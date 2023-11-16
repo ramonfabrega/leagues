@@ -1,6 +1,8 @@
+import { TasksMap } from "./constants";
+
 type TasksResponse = {
   username: string;
-  league_tasks: number[];
+  league_tasks: Array<number | string>;
 };
 
 (async () => {
@@ -33,5 +35,9 @@ async function fetchCompletedTasks(rsn: string) {
 
   const { username, league_tasks } = (await res.json()) as TasksResponse;
 
-  return { username, league_tasks };
+  const tasks = league_tasks.map(
+    (task) => TasksMap.get(task.toString()) || task
+  );
+
+  return { username, league_tasks: tasks };
 }
