@@ -12,13 +12,7 @@ type TasksResponse = {
   console.log(compared);
 })();
 
-function compareTasks({
-  rmn,
-  capo,
-}: {
-  rmn: TasksResponse;
-  capo: TasksResponse;
-}) {
+function compareTasks({ rmn, capo }: Record<"rmn" | "capo", TasksResponse>) {
   // Find tasks that are unique to rmn
   const uniqueToRmn = rmn.league_tasks.filter(
     (task) => !capo.league_tasks.includes(task)
