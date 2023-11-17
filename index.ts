@@ -6,13 +6,20 @@ type TasksResponse = {
 };
 
 (async () => {
+  while (true) {
+    await run();
+    await sleep(10000);
+  }
+})();
+
+async function run() {
   const rmn = await fetchCompletedTasks("rmn69");
   const capo = await fetchCompletedTasks("elcapo42069");
 
   const compared = compareTasks({ rmn, capo });
 
   console.log(compared);
-})();
+}
 
 function compareTasks({ rmn, capo }: Record<"rmn" | "capo", TasksResponse>) {
   // Find tasks that are unique to rmn
@@ -40,4 +47,8 @@ async function fetchCompletedTasks(rsn: string) {
   );
 
   return { username, league_tasks: tasks };
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
