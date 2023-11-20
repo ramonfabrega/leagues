@@ -2,8 +2,10 @@ import { TasksMap } from "./constants";
 
 type TasksResponse = {
   username: string;
-  league_tasks: Array<number | string>;
+  league_tasks: string[];
 };
+
+let cache: ReturnType<typeof compareTasks>;
 
 (async () => {
   while (true) {
@@ -18,7 +20,10 @@ async function run() {
 
   const compared = compareTasks({ rmn, capo });
 
-  console.log(compared);
+  if (!Bun.deepEquals(cache, compared)) {
+    cache = compared;
+    console.log(compared);
+  }
 }
 
 function compareTasks({ rmn, capo }: Record<"rmn" | "capo", TasksResponse>) {
