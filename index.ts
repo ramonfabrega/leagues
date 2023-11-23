@@ -21,6 +21,24 @@ async function run() {
   const compared = compareTasks({ rmn, capo });
 
   if (!Bun.deepEquals(cache, compared)) {
+    if (cache) {
+      // Log new tasks for rmn
+      const newTasksForRmn = compared.rmn.filter(
+        (task) => !cache.rmn.includes(task)
+      );
+      if (newTasksForRmn.length > 0) {
+        console.log("New tasks for rmn:", newTasksForRmn);
+      }
+
+      // Log new tasks for capo
+      const newTasksForCapo = compared.capo.filter(
+        (task) => !cache.capo.includes(task)
+      );
+      if (newTasksForCapo.length > 0) {
+        console.log("New tasks for capo:", newTasksForCapo);
+      }
+    }
+    // log the difference between cache and compared
     cache = compared;
     console.log(compared);
   }
