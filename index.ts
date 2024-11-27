@@ -15,8 +15,8 @@ while (true) {
 }
 
 async function run() {
-  const rmn = await fetchCompletedTasks("aaty");
-  const capo = await fetchCompletedTasks("mazhar");
+  const rmn = await fetchCompletedTasks("rmn69");
+  const capo = await fetchCompletedTasks("elcapo42069");
 
   const compared = compareTasks({ rmn, capo });
 
