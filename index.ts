@@ -15,8 +15,8 @@ while (true) {
 }
 
 async function run() {
-  const rmn = await fetchCompletedTasks("rmn420");
-  const capo = await fetchCompletedTasks("elcapo69420");
+  const rmn = await fetchCompletedTasks("aaty");
+  const capo = await fetchCompletedTasks("mazhar");
 
   const compared = compareTasks({ rmn, capo });
 
@@ -73,7 +73,7 @@ function compareTasks({ rmn, capo }: Record<"rmn" | "capo", TasksResponse>) {
 
 async function fetchCompletedTasks(rsn: string) {
   const res = await fetch(
-    `https://sync.runescape.wiki/runelite/player/${rsn}/TRAILBLAZER_RELOADED_LEAGUE`
+    `https://sync.runescape.wiki/runelite/player/${rsn}/RAGING_ECHOES_LEAGUE`
   );
 
   const { username, league_tasks } = (await res.json()) as TasksResponse;
