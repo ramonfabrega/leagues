@@ -1,4 +1,4 @@
-import { TasksMap } from "./constants";
+import { TasksAbove200Map, TasksMap } from "./constants";
 
 type TasksResponse = {
   username: string;
@@ -15,8 +15,8 @@ while (true) {
 }
 
 async function run() {
-  const rmn = await fetchCompletedTasks("rmn69");
-  const capo = await fetchCompletedTasks("elcapo42069");
+  const rmn = await fetchCompletedTasks("R amon");
+  const capo = await fetchCompletedTasks("greenbay420");
 
   const compared = compareTasks({ rmn, capo });
 
@@ -78,9 +78,14 @@ async function fetchCompletedTasks(rsn: string) {
 
   const { username, league_tasks } = (await res.json()) as TasksResponse;
 
-  const tasks = league_tasks.map(
-    (task) => TasksMap.get(task.toString()) || task
-  );
+  const tasks = league_tasks.flatMap((task) => {
+    const parsed = TasksAbove200Map.get(task.toString());
+    return parsed ? [parsed] : [];
+  });
+
+  // const tasks = league_tasks.map(
+  //   (task) => TasksAbove200Map.get(task.toString()) || task
+  // );
 
   return { username, league_tasks: tasks };
 }
