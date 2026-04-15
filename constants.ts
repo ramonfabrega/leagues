@@ -1,3 +1,7 @@
+export const LEAGUE = "DEMONIC_PACTS_LEAGUE";
+export const PLAYER_1 = "A Cold One";
+export const PLAYER_2 = "Lost Fauxcus";
+
 const tasks: Record<string, { name: string; points: number }> = {
   "0": { name: "Achieve Your First Level 10", points: 10 },
   "1": { name: "Achieve Your First Level 5", points: 10 },

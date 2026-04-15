@@ -1,4 +1,4 @@
-import { TasksMap } from "./constants";
+import { TasksMap, LEAGUE, PLAYER_1, PLAYER_2 } from "./constants";
 
 type Task = { name: string; points: number };
 
@@ -17,16 +17,16 @@ while (true) {
 }
 
 async function run() {
-  const rmn = await fetchCompletedTasks("A Cold One");
-  const capo = await fetchCompletedTasks("Lost Fauxcus");
+  const rmn = await fetchCompletedTasks(PLAYER_1);
+  const capo = await fetchCompletedTasks(PLAYER_2);
 
   const compared = compareTasks({ rmn, capo });
 
   if (!Bun.deepEquals(cache, compared)) {
     logNewTasks(compared);
     cache = compared;
-    printTasks("A Cold One", compared.rmn);
-    printTasks("Lost Fauxcus", compared.capo);
+    printTasks(PLAYER_1, compared.rmn);
+    printTasks(PLAYER_2, compared.capo);
   }
 }
 
@@ -59,10 +59,10 @@ function logNewTasks(compared: ComparedTasks) {
   );
 
   if (newForRmn.length > 0) {
-    console.log("New unique tasks for A Cold One:", sortedByPoints(newForRmn).map(formatTask));
+    console.log(`New unique tasks for ${PLAYER_1}:`, sortedByPoints(newForRmn).map(formatTask));
   }
   if (nowCommonForRmn.length > 0) {
-    console.log("Tasks now common (A Cold One):", sortedByPoints(nowCommonForRmn).map(formatTask));
+    console.log(`Tasks now common (${PLAYER_1}):`, sortedByPoints(nowCommonForRmn).map(formatTask));
   }
 
   const newForCapo = compared.capo.filter(
@@ -73,10 +73,10 @@ function logNewTasks(compared: ComparedTasks) {
   );
 
   if (newForCapo.length > 0) {
-    console.log("New unique tasks for Lost Fauxcus:", sortedByPoints(newForCapo).map(formatTask));
+    console.log(`New unique tasks for ${PLAYER_2}:`, sortedByPoints(newForCapo).map(formatTask));
   }
   if (nowCommonForCapo.length > 0) {
-    console.log("Tasks now common (Lost Fauxcus):", sortedByPoints(nowCommonForCapo).map(formatTask));
+    console.log(`Tasks now common (${PLAYER_2}):`, sortedByPoints(nowCommonForCapo).map(formatTask));
   }
 }
 
@@ -92,7 +92,7 @@ function compareTasks({ rmn, capo }: Record<"rmn" | "capo", PlayerTasks>) {
 
 async function fetchCompletedTasks(rsn: string): Promise<PlayerTasks> {
   const res = await fetch(
-    `https://sync.runescape.wiki/runelite/player/${rsn}/DEMONIC_PACTS_LEAGUE`
+    `https://sync.runescape.wiki/runelite/player/${rsn}/${LEAGUE}`
   );
 
   const { username, league_tasks } = (await res.json()) as {

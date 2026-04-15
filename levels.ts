@@ -1,3 +1,5 @@
+import { LEAGUE, PLAYER_1, PLAYER_2 } from "./constants";
+
 type LevelsResponse = {
   username: string;
   levels: {
@@ -10,8 +12,8 @@ type LevelsResponse = {
 })();
 
 async function run() {
-  const rmn = await fetchLevels("A Cold One");
-  const capo = await fetchLevels("Lost Fauxcus");
+  const rmn = await fetchLevels(PLAYER_1);
+  const capo = await fetchLevels(PLAYER_2);
 
   const compared = compareLevels({ rmn, capo });
 //   console.log(capo);
@@ -52,7 +54,7 @@ function compareLevels({ rmn, capo }: Record<"rmn" | "capo", LevelsResponse>) {
 
 async function fetchLevels(rsn: string) {
   const res = await fetch(
-    `https://sync.runescape.wiki/runelite/player/${rsn}/DEMONIC_PACTS_LEAGUE`
+    `https://sync.runescape.wiki/runelite/player/${rsn}/${LEAGUE}`
   );
 
   const { username, levels } = (await res.json()) as LevelsResponse;
