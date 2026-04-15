@@ -15,11 +15,21 @@ import { JSDOM } from "jsdom";
 
 const rows = await scrape();
 const tasks = parse(rows);
-console.log(tasks);
+
+// Generate constants.ts
+let out = 'const tasks: Record<string, { name: string; points: number }> = {\n';
+for (const [id, task] of Object.entries(tasks)) {
+  out += `  "${id}": { name: ${JSON.stringify(task.name)}, points: ${task.points} },\n`;
+}
+out += "};\n\n";
+out += "export const TasksMap = new Map(Object.entries(tasks));\n";
+
+await Bun.write("constants.ts", out);
+console.log(`Wrote constants.ts with ${Object.keys(tasks).length} tasks`);
 
 async function scrape() {
   const res = await fetch(
-    "https://oldschool.runescape.wiki/w/Raging_Echoes_League/Tasks"
+    "https://oldschool.runescape.wiki/w/Demonic_Pacts_League/Tasks"
   );
 
   const html = await res.text();
@@ -28,15 +38,16 @@ async function scrape() {
 }
 
 function parse(rows: NodeListOf<Element>) {
-  const tasks: Record<number, string> = {};
+  const tasks: Record<number, { name: string; points: number }> = {};
 
   rows.forEach((row) => {
     const taskId = Number(row.getAttribute("data-taskid"));
     const tds = row.querySelectorAll("td");
     const taskName = tds[1].textContent?.trim();
-    // const points = Number(tds[4].textContent?.trim());
+    const pointsTd = tds[4];
+    const points = Number(pointsTd?.getAttribute("data-sort-value") || pointsTd?.textContent?.trim());
     if (!taskName) return;
-    tasks[taskId] = taskName;
+    tasks[taskId] = { name: taskName, points };
   });
 
   return tasks;

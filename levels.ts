@@ -10,8 +10,8 @@ type LevelsResponse = {
 })();
 
 async function run() {
-  const rmn = await fetchLevels("rmn69");
-  const capo = await fetchLevels("elcapo42069");
+  const rmn = await fetchLevels("A Cold One");
+  const capo = await fetchLevels("Lost Fauxcus");
 
   const compared = compareLevels({ rmn, capo });
 //   console.log(capo);
@@ -52,7 +52,7 @@ function compareLevels({ rmn, capo }: Record<"rmn" | "capo", LevelsResponse>) {
 
 async function fetchLevels(rsn: string) {
   const res = await fetch(
-    `https://sync.runescape.wiki/runelite/player/${rsn}/TRAILBLAZER_RELOADED_LEAGUE`
+    `https://sync.runescape.wiki/runelite/player/${rsn}/DEMONIC_PACTS_LEAGUE`
   );
 
   const { username, levels } = (await res.json()) as LevelsResponse;
