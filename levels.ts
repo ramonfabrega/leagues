@@ -1,4 +1,5 @@
-import { LEAGUE, PLAYER_1, PLAYER_2 } from "./constants";
+import { PLAYER_1, PLAYER_2 } from "./constants";
+import { fetchPlayer } from "./api";
 
 type LevelsResponse = {
   username: string;
@@ -52,13 +53,7 @@ function compareLevels({ rmn, capo }: Record<"rmn" | "capo", LevelsResponse>) {
     return skillsToHighlight;
   }
 
-async function fetchLevels(rsn: string) {
-  const res = await fetch(
-    `https://sync.runescape.wiki/runelite/player/${encodeURIComponent(rsn)}/${LEAGUE}`,
-    { headers: { "User-Agent": "RuneLite" } }
-  );
-
-  const { username, levels } = (await res.json()) as LevelsResponse;
-
+async function fetchLevels(rsn: string): Promise<LevelsResponse> {
+  const { username, levels } = await fetchPlayer(rsn);
   return { username, levels };
 }

@@ -1,4 +1,5 @@
-import { TasksMap, LEAGUE, PLAYER_1, PLAYER_2 } from "./constants";
+import { TasksMap, PLAYER_1, PLAYER_2 } from "./constants";
+import { fetchPlayer } from "./api";
 
 type Task = { name: string; points: number };
 
@@ -91,15 +92,7 @@ function compareTasks({ rmn, capo }: Record<"rmn" | "capo", PlayerTasks>) {
 }
 
 async function fetchCompletedTasks(rsn: string): Promise<PlayerTasks> {
-  const res = await fetch(
-    `https://sync.runescape.wiki/runelite/player/${encodeURIComponent(rsn)}/${LEAGUE}`,
-    { headers: { "User-Agent": "RuneLite" } }
-  );
-
-  const { username, league_tasks } = (await res.json()) as {
-    username: string;
-    league_tasks: string[];
-  };
+  const { username, league_tasks } = await fetchPlayer(rsn);
 
   const tasks: Task[] = league_tasks.map((task) => {
     const info = TasksMap.get(task.toString());
