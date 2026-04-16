@@ -54,7 +54,8 @@ function compareLevels({ rmn, capo }: Record<"rmn" | "capo", LevelsResponse>) {
 
 async function fetchLevels(rsn: string) {
   const res = await fetch(
-    `https://sync.runescape.wiki/runelite/player/${rsn}/${LEAGUE}`
+    `https://sync.runescape.wiki/runelite/player/${encodeURIComponent(rsn)}/${LEAGUE}`,
+    { headers: { "User-Agent": "RuneLite" } }
   );
 
   const { username, levels } = (await res.json()) as LevelsResponse;

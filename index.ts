@@ -92,7 +92,8 @@ function compareTasks({ rmn, capo }: Record<"rmn" | "capo", PlayerTasks>) {
 
 async function fetchCompletedTasks(rsn: string): Promise<PlayerTasks> {
   const res = await fetch(
-    `https://sync.runescape.wiki/runelite/player/${rsn}/${LEAGUE}`
+    `https://sync.runescape.wiki/runelite/player/${encodeURIComponent(rsn)}/${LEAGUE}`,
+    { headers: { "User-Agent": "RuneLite" } }
   );
 
   const { username, league_tasks } = (await res.json()) as {
