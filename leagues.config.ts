@@ -1,0 +1,6 @@
+export default {
+  league: "DEMONIC_PACTS_LEAGUE",
+  wikiTasksUrl: "https://oldschool.runescape.wiki/w/Demonic_Pacts_League/Tasks",
+  players: ["R amon", "greenbay420"],
+  defaultPlayer: "R amon",
+} as const;

@@ -1,7 +1,13 @@
 {
   "name": "leagues",
-  "module": "index.ts",
+  "module": "src/cli.ts",
   "type": "module",
+  "scripts": {
+    "cli": "bun src/cli.ts",
+    "scrape": "bun src/cli.ts scrape",
+    "compare": "bun src/cli.ts compare",
+    "watch": "bun src/cli.ts compare --watch"
+  },
   "devDependencies": {
     "@types/jsdom": "^21.1.7",
     "bun-types": "latest"
