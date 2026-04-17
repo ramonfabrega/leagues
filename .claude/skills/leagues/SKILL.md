@@ -7,54 +7,53 @@ description: Query Old School RuneScape League (Demonic Pacts) progress — task
 
 Tracks OSRS league progress for the user and configured friends. Backed by a scraped catalog of every league task (`data/tasks.json`) and the RuneScape Wiki's live player-sync endpoint.
 
-**Configured players:** see `leagues.config.ts`. Default player is the first entry. When the user says "me" or doesn't name a player, use the default.
+**Configured players:** see `leagues.config.ts`. Default player is the first entry / `defaultPlayer`. When the user says "me" or doesn't name a player, use the default.
 
-## Always use `bun cli <subcommand>`
+## Use the `leagues` command
 
-All queries go through one entrypoint. Prefer `--json` when you need to parse output; omit it when you just need to show the user something.
+The CLI is installed globally via `bun link` and works from any directory. Always use `--json` when you need to parse the output to answer a specific question — skip it only if you're showing the user human-formatted text.
 
 ```
-bun cli compare "<player1>" "<player2>"     # diff unique tasks (one-shot)
-bun cli compare "<p1>" "<p2>" --watch       # permarunning, poll every 10s
-bun cli missing --player="<name>" [filters] # uncompleted tasks
-bun cli easiest --player="<name>" [filters] # missing tasks sorted by highest completion %
-bun cli unique --player="<name>" [--vs=A,B] # tasks this player has that others don't
-bun cli summary --player="<name>"           # counts, points, tier/area breakdown
-bun cli levels [--players=A,B,...]          # skill level gaps
-bun cli task "<exact task name>"            # show a single task (or suggestions)
-bun cli search "<substring>"                # search task names + descriptions
-bun cli scrape                              # refresh data/tasks.json from the wiki
+leagues compare <p1> <p2> [...] [--watch]       # diff unique tasks (optional permarunning mode)
+leagues missing [--player X] [filters]          # uncompleted tasks
+leagues easiest [--player X] [filters]          # missing tasks sorted by highest completion %
+leagues unique [--player X] [--vs A --vs B]     # tasks this player has that others don't
+leagues summary [--player X]                    # counts, points, tier/area breakdown
+leagues levels [--players A --players B]        # skill level gaps
+leagues task "<exact name>"                     # show a single task (or fuzzy suggestions)
+leagues search "<substring>"                    # task name + description search
+leagues scrape                                  # refresh data/tasks.json from the wiki
 ```
 
 ### Filter flags (for `missing` and `easiest`)
 
-- `--skill=Fletching` — tasks requiring a specific skill
-- `--tier=easy|medium|hard|elite|master`
-- `--area=general|tirannwn|varlamore|...`
-- `--max-points=N` / `--min-points=N`
-- `--min-completion=N` / `--max-completion=N` (as a percent, e.g. `--min-completion=50`)
+- `--skill Fletching` — tasks requiring a specific wiki skill level
+- `--tier easy|medium|hard|elite|master`
+- `--area general|tirannwn|varlamore|...`
+- `--max-points N` / `--min-points N`
+- `--min-completion N` / `--max-completion N` (percent; e.g. `--min-completion 50`)
 - `--pact-only` — only league-specific "pact" tasks
-- `--limit=N` — cap rows (easiest defaults to 20)
+- `--limit N` — cap rows (easiest defaults to 20)
 - `--json` — machine-readable output
 
 ## Question → command cheatsheet
 
 | User asks | Run |
 |---|---|
-| "what fletching tasks am I missing?" | `bun cli missing --skill=Fletching --json` |
-| "easiest fletching tasks I haven't done" | `bun cli easiest --skill=Fletching --json` |
-| "what's the easiest task I can do right now?" | `bun cli easiest --limit=10 --json` |
-| "how many points do I have?" | `bun cli summary --json` |
-| "what tasks do I have that greenbay doesn't?" | `bun cli unique --player="R amon" --vs=greenbay420 --json` |
-| "compare me and greenbay" | `bun cli compare "R amon" "greenbay420"` |
-| "what tasks give me 30 points that I'm missing?" | `bun cli missing --min-points=30 --max-points=30 --json` |
-| "what tirannwn tasks am I missing?" | `bun cli missing --area=tirannwn --json` |
-| "what's the completion % for X?" | `bun cli task "X"` |
-| "who's ahead on fletching?" | `bun cli levels --json` |
+| "what fletching tasks am I missing?" | `leagues missing --skill Fletching --json` |
+| "easiest fletching tasks I haven't done" | `leagues easiest --skill Fletching --json` |
+| "what's the easiest task I can do right now?" | `leagues easiest --limit 10 --json` |
+| "how many points do I have?" | `leagues summary --json` |
+| "what tasks do I have that greenbay doesn't?" | `leagues unique --player "R amon" --vs greenbay420 --json` |
+| "compare me and greenbay" | `leagues compare "R amon" "greenbay420"` |
+| "what 30pt tasks am I missing?" | `leagues missing --min-points 30 --max-points 30 --json` |
+| "what tirannwn tasks am I missing?" | `leagues missing --area tirannwn --json` |
+| "what's the completion % for X?" | `leagues task "X"` |
+| "who's ahead on fletching?" | `leagues levels --json` |
 
 ## Filtering semantics
 
-- `--skill=X` filters to tasks whose **explicit wiki requirement** lists skill X. It does NOT use semantic matching — "Catch a Herring" is a Fishing task but has no explicit Fishing level requirement, so it won't appear under `--skill=Fishing`. For semantic questions ("what Fishing-themed tasks…"), pull broader results (e.g. `bun cli search fish --json`) and filter yourself from the JSON.
+- `--skill X` filters to tasks whose **explicit wiki requirement** lists skill X. It does NOT use semantic matching — "Catch a Herring" is a Fishing task but has no explicit Fishing level requirement, so it won't appear under `--skill Fishing`. For semantic/thematic questions ("what Fishing-themed tasks…"), use `leagues search fish --json` and filter yourself from the results.
 - `completionPct` is the share of all league players who completed that task. Higher % means easier / more commonly done. `null` means the wiki didn't report a %.
 - Tier → points mapping: easy 10, medium 30, hard 80, elite 200, master 400.
 
@@ -62,14 +61,12 @@ bun cli scrape                              # refresh data/tasks.json from the w
 
 `data/tasks.json` is generated by scraping the wiki tasks page. Re-scrape when:
 - The user mentions the league just updated / new tasks dropped.
-- Completion %s feel stale and the user cares about "easiest right now."
-- You get `unknown task IDs` warnings in `summary` output.
+- Completion %s feel stale and the user cares about "easiest right now".
+- You get `⚠ unknown task ids` warnings in `summary` output.
 
 ```
-bun cli scrape
+leagues scrape
 ```
-
-Scraping takes a few seconds and overwrites `data/tasks.json` atomically. Commit the change if the user asks you to.
 
 ## Catalog shape
 
@@ -78,16 +75,14 @@ type Task = {
   id: number;
   name: string;
   description: string;
-  points: number;           // 10 / 30 / 80 / 200 / 400
+  points: number;                 // 10 / 30 / 80 / 200 / 400
   tier: "easy" | "medium" | "hard" | "elite" | "master";
-  area: string;             // "general" | "tirannwn" | "varlamore" | ...
+  area: string;                   // "general" | "tirannwn" | "varlamore" | ...
   isPactTask: boolean;
-  completionPct: number | null;  // 0.05 means "<0.1%" in the wiki
+  completionPct: number | null;   // 0.05 represents the wiki's "<0.1%"
   requirements: {
     skills: { skill: string; level: number }[];
-    other: string | null;   // non-skill reqs like "Completion of Vale Totems"
+    other: string | null;         // non-skill reqs like "Completion of Vale Totems"
   };
 };
 ```
-
-All CLI commands accept `--json` for structured output — prefer that when you need to answer specific questions so you can pull fields directly rather than parsing pretty text.

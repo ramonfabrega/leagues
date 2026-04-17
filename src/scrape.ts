@@ -1,35 +1,37 @@
 import { JSDOM } from "jsdom";
-import { LEAGUE, WIKI_TASKS_URL } from "./lib/config";
+import { LEAGUE, WIKI_TASKS_URL } from "../leagues.config";
+import { fetchWikiTasksHtml } from "./lib/api";
 import {
   writeCatalog,
-  CATALOG_FILE_PATH,
+  TIERS,
   type Catalog,
   type Task,
   type Tier,
 } from "./lib/catalog";
 
-const VALID_TIERS: readonly Tier[] = ["easy", "medium", "hard", "elite", "master"];
-
-export async function scrape(): Promise<Catalog> {
-  const html = await fetchHtml(WIKI_TASKS_URL);
+export function parseTasksHtml(html: string): Task[] {
   const dom = new JSDOM(html);
   const rows = dom.window.document.querySelectorAll<HTMLTableRowElement>(
     "tr[data-taskid]"
   );
-
   const tasks: Task[] = [];
   rows.forEach((row) => {
     const task = parseRow(row);
     if (task) tasks.push(task);
   });
-
   tasks.sort((a, b) => a.id - b.id);
+  return tasks;
+}
 
+export async function scrape(
+  url: string = WIKI_TASKS_URL
+): Promise<Catalog> {
+  const html = await fetchWikiTasksHtml(url);
   return {
     league: LEAGUE,
     scrapedAt: new Date().toISOString(),
-    source: WIKI_TASKS_URL,
-    tasks,
+    source: url,
+    tasks: parseTasksHtml(html),
   };
 }
 
@@ -39,18 +41,12 @@ export async function scrapeAndWrite(): Promise<Catalog> {
   return catalog;
 }
 
-async function fetchHtml(url: string): Promise<string> {
-  const res = await fetch(url, { headers: { "User-Agent": "leagues-scraper/1.0" } });
-  if (!res.ok) throw new Error(`GET ${url} → ${res.status}`);
-  return await res.text();
-}
-
 function parseRow(row: HTMLTableRowElement): Task | null {
   const id = Number(row.getAttribute("data-taskid"));
   if (!Number.isFinite(id)) return null;
 
   const tier = row.getAttribute("data-league-tier") as Tier | null;
-  if (!tier || !VALID_TIERS.includes(tier)) return null;
+  if (!tier || !TIERS.includes(tier)) return null;
 
   const points = Number(row.getAttribute("data-league-points") ?? "0");
   const area = row.getAttribute("data-league-area-for-filtering") ?? "unknown";
@@ -64,17 +60,7 @@ function parseRow(row: HTMLTableRowElement): Task | null {
   const requirements = parseRequirements(tds[3] ?? null);
   const completionPct = parseCompletion(tds[5] ?? null);
 
-  return {
-    id,
-    name,
-    description,
-    points,
-    tier,
-    area,
-    isPactTask,
-    completionPct,
-    requirements,
-  };
+  return { id, name, description, points, tier, area, isPactTask, completionPct, requirements };
 }
 
 function parseRequirements(cell: Element | null): Task["requirements"] {
@@ -102,11 +88,4 @@ function parseCompletion(cell: Element | null): number | null {
   if (lt) return Number(lt[1]) / 2; // "<0.1%" → 0.05 (midpoint-ish for sortability)
   const m = text.match(/([\d.]+)\s*%/);
   return m ? Number(m[1]) : null;
-}
-
-if (import.meta.main) {
-  const catalog = await scrapeAndWrite();
-  console.log(
-    `Wrote ${catalog.tasks.length} tasks to ${CATALOG_FILE_PATH} (league=${catalog.league})`
-  );
 }

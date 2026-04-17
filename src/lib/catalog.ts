@@ -1,30 +1,39 @@
 import path from "node:path";
+import { z } from "zod";
 
-export type Tier = "easy" | "medium" | "hard" | "elite" | "master";
+export const TIERS = ["easy", "medium", "hard", "elite", "master"] as const;
+export const TierSchema = z.enum(TIERS);
+export type Tier = z.infer<typeof TierSchema>;
 
-export type SkillRequirement = { skill: string; level: number };
+export const SkillRequirementSchema = z.object({
+  skill: z.string(),
+  level: z.number().int().nonnegative(),
+});
+export type SkillRequirement = z.infer<typeof SkillRequirementSchema>;
 
-export type Task = {
-  id: number;
-  name: string;
-  description: string;
-  points: number;
-  tier: Tier;
-  area: string;
-  isPactTask: boolean;
-  completionPct: number | null;
-  requirements: {
-    skills: SkillRequirement[];
-    other: string | null;
-  };
-};
+export const TaskSchema = z.object({
+  id: z.number().int().nonnegative(),
+  name: z.string().min(1),
+  description: z.string(),
+  points: z.number().int().nonnegative(),
+  tier: TierSchema,
+  area: z.string().min(1),
+  isPactTask: z.boolean(),
+  completionPct: z.number().nullable(),
+  requirements: z.object({
+    skills: z.array(SkillRequirementSchema),
+    other: z.string().nullable(),
+  }),
+});
+export type Task = z.infer<typeof TaskSchema>;
 
-export type Catalog = {
-  league: string;
-  scrapedAt: string;
-  source: string;
-  tasks: Task[];
-};
+export const CatalogSchema = z.object({
+  league: z.string(),
+  scrapedAt: z.string(),
+  source: z.string(),
+  tasks: z.array(TaskSchema),
+});
+export type Catalog = z.infer<typeof CatalogSchema>;
 
 const CATALOG_PATH = path.join(import.meta.dir, "../../data/tasks.json");
 
@@ -36,11 +45,16 @@ export async function loadCatalog(): Promise<Catalog> {
   if (cached) return cached;
   const file = Bun.file(CATALOG_PATH);
   if (!(await file.exists())) {
+    throw new Error(`data/tasks.json not found. Run "leagues scrape" to generate it.`);
+  }
+  const raw = await file.json();
+  const parsed = CatalogSchema.safeParse(raw);
+  if (!parsed.success) {
     throw new Error(
-      `data/tasks.json not found. Run "bun cli scrape" to generate it.`
+      `data/tasks.json is malformed — re-run "leagues scrape":\n${z.prettifyError(parsed.error)}`
     );
   }
-  cached = (await file.json()) as Catalog;
+  cached = parsed.data;
   return cached;
 }
 

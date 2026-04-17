@@ -21,6 +21,8 @@ export type TaskFilter = {
   pactOnly?: boolean;
 };
 
+// ─── I/O wrappers ──────────────────────────────────────────────────
+
 export async function getPlayerProgress(rsn: string): Promise<PlayerProgress> {
   const raw = await fetchPlayer(rsn);
   return await buildProgress(raw);
@@ -53,6 +55,25 @@ async function buildProgress(raw: PlayerData): Promise<PlayerProgress> {
   };
 }
 
+export async function missingTasks(
+  player: PlayerProgress,
+  filter: TaskFilter = {}
+): Promise<Task[]> {
+  const { tasks } = await loadCatalog();
+  return filterMissing(tasks, player, filter);
+}
+
+export async function easiestMissing(
+  player: PlayerProgress,
+  filter: TaskFilter = {},
+  limit = 20
+): Promise<Task[]> {
+  const { tasks } = await loadCatalog();
+  return pickEasiest(tasks, player, filter, limit);
+}
+
+// ─── Pure query fns (testable) ─────────────────────────────────────
+
 export function matchesFilter(task: Task, filter: TaskFilter): boolean {
   if (filter.tier && task.tier !== filter.tier) return false;
   if (filter.area && task.area.toLowerCase() !== filter.area.toLowerCase()) return false;
@@ -77,32 +98,32 @@ export function matchesFilter(task: Task, filter: TaskFilter): boolean {
   return true;
 }
 
-export async function missingTasks(
+export function filterMissing(
+  catalog: Task[],
   player: PlayerProgress,
   filter: TaskFilter = {}
-): Promise<Task[]> {
-  const { tasks } = await loadCatalog();
-  return tasks.filter(
+): Task[] {
+  return catalog.filter(
     (t) => !player.completedTaskIds.has(t.id) && matchesFilter(t, filter)
   );
 }
 
-export async function easiestMissing(
+export function pickEasiest(
+  catalog: Task[],
   player: PlayerProgress,
   filter: TaskFilter = {},
   limit = 20
-): Promise<Task[]> {
-  const missing = await missingTasks(player, filter);
-  return missing
+): Task[] {
+  return filterMissing(catalog, player, filter)
     .filter((t) => t.completionPct !== null)
-    .sort((a, b) => (b.completionPct! - a.completionPct!))
+    .sort((a, b) => b.completionPct! - a.completionPct!)
     .slice(0, limit);
 }
 
-export async function uniqueTasks(
+export function uniqueTasks(
   target: PlayerProgress,
   others: PlayerProgress[]
-): Promise<Task[]> {
+): Task[] {
   const otherIds = new Set<number>();
   for (const o of others) for (const id of o.completedTaskIds) otherIds.add(id);
   return target.completed.filter((t) => !otherIds.has(t.id));
@@ -162,7 +183,10 @@ export function levelGaps(
     let hasAll = true;
     for (const p of players) {
       const lvl = p.levels[skill];
-      if (lvl === undefined) { hasAll = false; break; }
+      if (lvl === undefined) {
+        hasAll = false;
+        break;
+      }
       levels[p.username] = lvl;
       if (lvl < low) low = lvl;
       if (lvl > high) high = lvl;

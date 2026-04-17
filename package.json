@@ -1,21 +1,28 @@
 {
   "name": "leagues",
-  "module": "src/cli.ts",
+  "module": "src/cli.tsx",
   "type": "module",
+  "bin": {
+    "leagues": "./src/cli.tsx"
+  },
   "scripts": {
-    "cli": "bun src/cli.ts",
-    "scrape": "bun src/cli.ts scrape",
-    "compare": "bun src/cli.ts compare",
-    "watch": "bun src/cli.ts compare --watch"
+    "start": "bun src/cli.tsx",
+    "test": "bun test",
+    "typecheck": "bun tsc --noEmit"
   },
   "devDependencies": {
     "@types/jsdom": "^21.1.7",
+    "@types/react": "^19.2.14",
     "bun-types": "latest"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "jsdom": "^25.0.1"
+    "ink": "^7.0.1",
+    "jsdom": "^25.0.1",
+    "pastel": "^4.0.1",
+    "react": "^19.2.5",
+    "zod": "^4.3.6"
   }
 }
