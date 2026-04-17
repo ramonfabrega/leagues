@@ -52,6 +52,7 @@ export function Json<T>({ json, data, children }: JsonProps<T>) {
   useEffect(() => {
     if (json) process.stdout.write(`${JSON.stringify(data, null, 2)}\n`);
     exit();
+    terminateRender(json);
   }, [exit, json, data]);
   if (json) return null;
   return <>{children}</>;
@@ -61,7 +62,15 @@ export function useExit() {
   const { exit } = useApp();
   useEffect(() => {
     exit();
+    terminateRender(false);
   }, [exit]);
+}
+
+// Ink's TTY renderer leaves the cursor at the end of the last rendered line
+// without a trailing newline, which makes zsh show a trailing `%`. Write one
+// only on a TTY and only for non-JSON output (JSON already has its own `\n`).
+function terminateRender(json: boolean) {
+  if (!json && process.stdout.isTTY) process.stdout.write("\n");
 }
 
 type AsyncProps<T> = {
