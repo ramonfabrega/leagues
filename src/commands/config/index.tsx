@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Async } from "../../components/Async";
+import { Json } from "../../components/Async";
 import { ConfigView } from "../../components/ConfigView";
 import { jsonOption } from "../../lib/cli-options";
 import { loadSettings } from "../../lib/settings";
@@ -14,11 +14,10 @@ export const options = z.object({
 type Props = { options: z.infer<typeof options> };
 
 export default function ConfigShow({ options }: Props) {
+  const settings = loadSettings();
   return (
-    <Async
-      loader={() => loadSettings()}
-      render={(settings) => <ConfigView settings={settings} />}
-      json={options.json}
-    />
+    <Json json={options.json} data={settings}>
+      <ConfigView settings={settings} />
+    </Json>
   );
 }

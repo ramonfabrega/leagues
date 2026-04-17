@@ -13,9 +13,9 @@ type Snapshot = {
   at: string;
 };
 
-async function resolvePlayers(args: string[]): Promise<string[]> {
-  if (args.length >= 2) return await Promise.all(args.map(resolvePlayer));
-  const { players } = await loadSettings();
+function resolvePlayers(args: string[]): string[] {
+  if (args.length >= 2) return args.map(resolvePlayer);
+  const { players } = loadSettings();
   if (players.length < 2) {
     throw new Error(
       "compare needs at least 2 players (pass them as args or configure them via leagues config)"
@@ -63,7 +63,7 @@ export function CompareOnce({ args, json }: { args: string[]; json?: boolean }) 
   return (
     <Async
       loader={async () => {
-        const players = await resolvePlayers(args);
+        const players = resolvePlayers(args);
         const snapshot = await buildSnapshot(players);
         return { players, snapshot };
       }}
@@ -227,7 +227,7 @@ export function CompareWatch({ args, intervalMs }: { args: string[]; intervalMs:
 
     (async () => {
       try {
-        const ps = await resolvePlayers(args);
+        const ps = resolvePlayers(args);
         if (cancelled) return;
         setPlayers(ps);
         await poll(ps);

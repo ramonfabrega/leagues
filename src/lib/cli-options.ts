@@ -75,7 +75,7 @@ type FilterInput = {
   allRegions?: boolean;
 };
 
-export async function buildFilter(o: FilterInput): Promise<TaskFilter> {
+export function buildFilter(o: FilterInput): TaskFilter {
   const base: TaskFilter = {
     skill: o.skill,
     tier: o.tier,
@@ -87,7 +87,7 @@ export async function buildFilter(o: FilterInput): Promise<TaskFilter> {
     pactOnly: o.pactOnly,
   };
   if (o.allRegions || o.area) return base;
-  const { unlockedRegions } = await loadSettings();
+  const { unlockedRegions } = loadSettings();
   if (unlockedRegions.length === 0) return base;
   return { ...base, areas: [...effectiveUnlockedRegions(unlockedRegions), "general"] };
 }

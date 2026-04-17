@@ -14,7 +14,7 @@ export const PlayerDataSchema = z.object({
 export type PlayerData = z.infer<typeof PlayerDataSchema>;
 
 export async function fetchPlayer(rsn: string): Promise<PlayerData> {
-  const { league } = await loadSettings();
+  const { league } = loadSettings();
   const json = await fetchPlayerRaw(rsn, league);
   const parsed = PlayerDataSchema.safeParse(json);
   if (!parsed.success) {
@@ -26,7 +26,7 @@ export async function fetchPlayer(rsn: string): Promise<PlayerData> {
 }
 
 export async function fetchTasksPage(): Promise<{ html: string; league: string; source: string }> {
-  const { league, wikiTasksUrl } = await loadSettings();
+  const { league, wikiTasksUrl } = loadSettings();
   const res = await fetch(wikiTasksUrl, { headers: { "User-Agent": USER_AGENT } });
   if (!res.ok) throw new Error(`GET ${wikiTasksUrl} → ${res.status} ${res.statusText}`);
   return { html: await res.text(), league, source: wikiTasksUrl };

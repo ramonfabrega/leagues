@@ -34,13 +34,34 @@ type AsyncContentProps<T> = {
 
 function AsyncContent<T>({ promise, json, render }: AsyncContentProps<T>) {
   const data = use(promise);
+  return (
+    <Json json={json} data={data}>
+      {render(data)}
+    </Json>
+  );
+}
+
+type JsonProps<T> = {
+  json: boolean;
+  data: T;
+  children: ReactNode;
+};
+
+export function Json<T>({ json, data, children }: JsonProps<T>) {
   const { exit } = useApp();
   useEffect(() => {
     if (json) process.stdout.write(`${JSON.stringify(data, null, 2)}\n`);
     exit();
   }, [exit, json, data]);
   if (json) return null;
-  return <>{render(data)}</>;
+  return <>{children}</>;
+}
+
+export function useExit() {
+  const { exit } = useApp();
+  useEffect(() => {
+    exit();
+  }, [exit]);
 }
 
 type AsyncProps<T> = {

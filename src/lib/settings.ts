@@ -1,4 +1,4 @@
-import { unlink } from "node:fs/promises";
+import { existsSync, readFileSync, unlinkSync } from "node:fs";
 import path from "node:path";
 import { z } from "zod";
 
@@ -39,26 +39,26 @@ export type Settings = {
 
 let cached: Settings | null = null;
 
-export async function loadSettings(): Promise<Settings> {
+export function loadSettings(): Settings {
   if (cached) return cached;
-  const [project, local] = await Promise.all([readProjectConfig(), readLocalConfig()]);
-  cached = mergeSettings(project, local);
+  cached = mergeSettings(readProjectConfig(), readLocalConfig());
   return cached;
 }
 
-export async function resolvePlayer(input?: string): Promise<string> {
-  const { players, defaultPlayer } = await loadSettings();
+export function resolvePlayer(input?: string): string {
+  const { players, defaultPlayer } = loadSettings();
   if (!input) return defaultPlayer;
   return players.find((p) => p.toLowerCase() === input.toLowerCase()) ?? input;
 }
 
-export async function otherPlayers(player: string): Promise<string[]> {
-  const { players } = await loadSettings();
+export function otherPlayers(player: string): string[] {
+  const { players } = loadSettings();
   return players.filter((p) => p.toLowerCase() !== player.toLowerCase());
 }
 
 export async function setDefaultPlayer(rsn: string): Promise<Settings> {
-  const [project, local] = await Promise.all([readProjectConfig(), readLocalConfig()]);
+  const project = readProjectConfig();
+  const local = readLocalConfig();
   const known = [...project.players, ...(local?.extraPlayers ?? [])];
   if (!known.some((p) => p.toLowerCase() === rsn.toLowerCase())) {
     throw new Error(
@@ -69,7 +69,8 @@ export async function setDefaultPlayer(rsn: string): Promise<Settings> {
 }
 
 export async function addExtraPlayer(rsn: string): Promise<Settings> {
-  const [project, local] = await Promise.all([readProjectConfig(), readLocalConfig()]);
+  const project = readProjectConfig();
+  const local = readLocalConfig();
   if (project.players.some((p) => p.toLowerCase() === rsn.toLowerCase())) {
     throw new Error(`"${rsn}" is already in leagues.config.json — no local override needed`);
   }
@@ -81,7 +82,7 @@ export async function addExtraPlayer(rsn: string): Promise<Settings> {
 }
 
 export async function removeExtraPlayer(rsn: string): Promise<Settings> {
-  const local = await readLocalConfig();
+  const local = readLocalConfig();
   const extra = local?.extraPlayers ?? [];
   const next = extra.filter((p) => p.toLowerCase() !== rsn.toLowerCase());
   if (next.length === extra.length) {
@@ -93,7 +94,7 @@ export async function removeExtraPlayer(rsn: string): Promise<Settings> {
 export const ALWAYS_UNLOCKED: Region[] = ["karamja"];
 
 export async function setUnlockedRegions(regions: Region[]): Promise<Settings> {
-  const local = await readLocalConfig();
+  const local = readLocalConfig();
   const sorted = REGIONS.filter((r) => regions.includes(r) || ALWAYS_UNLOCKED.includes(r));
   return await writeLocal({ ...(local ?? {}), unlockedRegions: sorted });
 }
@@ -104,22 +105,21 @@ export function effectiveUnlockedRegions(regions: Region[]): Region[] {
   return REGIONS.filter((r) => set.has(r));
 }
 
-export async function resetLocalConfig(): Promise<{ settings: Settings; removed: boolean }> {
-  const file = Bun.file(LOCAL_CONFIG_PATH);
-  const existed = await file.exists();
-  if (existed) await unlink(LOCAL_CONFIG_PATH);
+export function resetLocalConfig(): { settings: Settings; removed: boolean } {
+  const existed = existsSync(LOCAL_CONFIG_PATH);
+  if (existed) unlinkSync(LOCAL_CONFIG_PATH);
   cached = null;
-  return { settings: await loadSettings(), removed: existed };
+  return { settings: loadSettings(), removed: existed };
 }
 
 // ─── Internal ──────────────────────────────────────────────────────
 
-async function readProjectConfig(): Promise<ProjectConfig> {
-  const file = Bun.file(PROJECT_CONFIG_PATH);
-  if (!(await file.exists())) {
+function readProjectConfig(): ProjectConfig {
+  if (!existsSync(PROJECT_CONFIG_PATH)) {
     throw new Error(`leagues.config.json not found at ${PROJECT_CONFIG_PATH}`);
   }
-  const parsed = ProjectConfigSchema.safeParse(await file.json());
+  const raw: unknown = JSON.parse(readFileSync(PROJECT_CONFIG_PATH, "utf8"));
+  const parsed = ProjectConfigSchema.safeParse(raw);
   if (!parsed.success) {
     throw new Error(`leagues.config.json is invalid:\n${z.prettifyError(parsed.error)}`);
   }
@@ -133,10 +133,10 @@ async function readProjectConfig(): Promise<ProjectConfig> {
   return parsed.data;
 }
 
-async function readLocalConfig(): Promise<LocalConfig | null> {
-  const file = Bun.file(LOCAL_CONFIG_PATH);
-  if (!(await file.exists())) return null;
-  const parsed = LocalConfigSchema.safeParse(await file.json());
+function readLocalConfig(): LocalConfig | null {
+  if (!existsSync(LOCAL_CONFIG_PATH)) return null;
+  const raw: unknown = JSON.parse(readFileSync(LOCAL_CONFIG_PATH, "utf8"));
+  const parsed = LocalConfigSchema.safeParse(raw);
   if (!parsed.success) {
     throw new Error(`leagues.local.json is invalid:\n${z.prettifyError(parsed.error)}`);
   }
@@ -146,7 +146,7 @@ async function readLocalConfig(): Promise<LocalConfig | null> {
 async function writeLocal(local: LocalConfig): Promise<Settings> {
   await Bun.write(LOCAL_CONFIG_PATH, `${JSON.stringify(local, null, 2)}\n`);
   cached = null;
-  return await loadSettings();
+  return loadSettings();
 }
 
 export function mergeSettings(project: ProjectConfig, local: LocalConfig | null): Settings {

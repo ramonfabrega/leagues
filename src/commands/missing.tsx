@@ -27,8 +27,8 @@ export default function Missing({ options }: Props) {
   return (
     <Async
       loader={async () => {
-        const player = await getPlayerProgress(await resolvePlayer(options.player));
-        const all = await missingTasks(player, await buildFilter(options));
+        const player = await getPlayerProgress(resolvePlayer(options.player));
+        const all = await missingTasks(player, buildFilter(options));
         const tasks = options.limit ? all.slice(0, options.limit) : all;
         return { label: `Missing for ${player.username}`, tasks };
       }}

@@ -1,6 +1,5 @@
 import { Box, Text } from "ink";
 import { argument } from "pastel";
-import { useEffect, useState } from "react";
 import { z } from "zod";
 
 import { Async } from "../../components/Async";
@@ -32,16 +31,7 @@ export default function RemovePlayer({ args }: Props) {
 }
 
 function InteractivePicker() {
-  const [settings, setSettings] = useState<Settings | null>(null);
-  const [err, setErr] = useState<Error | null>(null);
-
-  useEffect(() => {
-    loadSettings().then(setSettings).catch(setErr);
-  }, []);
-
-  if (err) return <Text color="red">Error: {err.message}</Text>;
-  if (!settings) return <Text color="gray">Loading…</Text>;
-  const extras = settings.overrides.extraPlayers;
+  const extras = loadSettings().overrides.extraPlayers;
   return (
     <Pick
       label="Select a player to remove from extraPlayers"

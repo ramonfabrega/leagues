@@ -24,8 +24,8 @@ export default function Levels({ options }: Props) {
     <Async
       loader={async () => {
         const rsns = options.players?.length
-          ? await Promise.all(options.players.map(resolvePlayer))
-          : (await loadSettings()).players;
+          ? options.players.map(resolvePlayer)
+          : loadSettings().players;
         const progresses = await Promise.all(rsns.map(getPlayerProgress));
         return { players: rsns, diffs: levelGaps(progresses) };
       }}

@@ -46,10 +46,8 @@ export default function Search({ args, options }: Props) {
   return (
     <Async
       loader={async () => {
-        const player = options.all
-          ? null
-          : await getPlayerProgress(await resolvePlayer(options.player));
-        const filter = await buildFilter({ allRegions: options.all || options.allRegions });
+        const player = options.all ? null : await getPlayerProgress(resolvePlayer(options.player));
+        const filter = buildFilter({ allRegions: options.all || options.allRegions });
         const matches = await searchCatalog(query, { player: player ?? undefined, filter });
         const tasks = matches.slice(0, options.limit);
         const label = player

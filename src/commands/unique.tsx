@@ -29,10 +29,10 @@ export default function UniqueCmd({ options }: Props) {
   return (
     <Async
       loader={async () => {
-        const targetName = await resolvePlayer(options.player);
+        const targetName = resolvePlayer(options.player);
         const vsNames = options.vs?.length
-          ? await Promise.all(options.vs.map((s) => resolvePlayer(s.trim())))
-          : await otherPlayers(targetName);
+          ? options.vs.map((s) => resolvePlayer(s.trim()))
+          : otherPlayers(targetName);
         const [target, others] = await Promise.all([
           getPlayerProgress(targetName),
           Promise.all(vsNames.map(getPlayerProgress)),
