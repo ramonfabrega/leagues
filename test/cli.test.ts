@@ -23,8 +23,14 @@ async function runCli(args: string[], env: Record<string, string> = {}) {
 // commands that don't touch the network. These catch render/lifecycle regressions
 // that unit tests on pure logic miss (e.g. nested <CommandBody> exiting early).
 describe("cli integration", () => {
-  test("leagues search --all --json returns matches", async () => {
-    const { stdout, exitCode } = await runCli(["search", "--all", "--json", "Willow longbow"]);
+  test("leagues search --completed --all-regions --json returns matches", async () => {
+    const { stdout, exitCode } = await runCli([
+      "search",
+      "--completed",
+      "--all-regions",
+      "--json",
+      "Willow longbow",
+    ]);
     expect(exitCode).toBe(0);
     const obj = JSON.parse(stdout);
     expect(obj.tasks.length).toBeGreaterThan(0);

@@ -10,9 +10,6 @@
     "skipLibCheck": true,
     "jsx": "react-jsx",
     "forceConsistentCasingInFileNames": true,
-    "types": ["bun-types"],
-    "paths": {
-      "@/*": ["./src/*"]
-    }
+    "types": ["bun-types"]
   }
 }

@@ -2,8 +2,8 @@ import { Box, Text } from "ink";
 import { argument } from "pastel";
 import { z } from "zod";
 
-import { Async } from "@/components/Async";
-import { addExtraPlayer } from "@/lib/settings";
+import { Async } from "../../components/Async";
+import { addExtraPlayer } from "../../lib/settings";
 
 export const description = "Add a player to your personal extraPlayers list";
 

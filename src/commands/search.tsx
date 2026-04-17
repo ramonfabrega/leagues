@@ -19,15 +19,10 @@ export const options = z.object({
     .default(50)
     .describe(option({ description: "Cap result count" })),
   player: playerOption,
-  all: z
+  completed: z
     .boolean()
     .default(false)
-    .describe(
-      option({
-        description: "Include completed tasks and ignore unlockedRegions filter",
-        alias: "a",
-      })
-    ),
+    .describe(option({ description: "Include completed tasks (default: excluded)", alias: "c" })),
   allRegions: z
     .boolean()
     .default(false)
@@ -46,8 +41,10 @@ export default function Search({ args, options }: Props) {
   return (
     <Async
       loader={async () => {
-        const player = options.all ? null : await getPlayerProgress(resolvePlayer(options.player));
-        const filter = buildFilter({ allRegions: options.all || options.allRegions });
+        const player = options.completed
+          ? null
+          : await getPlayerProgress(resolvePlayer(options.player));
+        const filter = buildFilter({ allRegions: options.allRegions });
         const matches = await searchCatalog(query, { player: player ?? undefined, filter });
         const tasks = matches.slice(0, options.limit);
         const label = player

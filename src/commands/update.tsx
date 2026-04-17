@@ -52,10 +52,12 @@ export default function Update({ options }: Props) {
       loadingLabel="Updating"
       loader={async () => {
         const steps: Step[] = [];
-        for (const cmd of [
+        const cmds = [
           ["git", "pull"],
           ["bun", "install"],
-        ]) {
+          ...(options.scrape ? [["bun", "src/cli.tsx", "scrape"]] : []),
+        ];
+        for (const cmd of cmds) {
           const step = await run(cmd);
           steps.push(step);
           if (step.exitCode !== 0) {
@@ -63,9 +65,6 @@ export default function Update({ options }: Props) {
               `\`${step.name}\` failed (exit ${step.exitCode})\n${step.stderr || step.stdout}`
             );
           }
-        }
-        if (options.scrape) {
-          steps.push(await run(["bun", "src/cli.tsx", "scrape"]));
         }
         return { steps };
       }}
