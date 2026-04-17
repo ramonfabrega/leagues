@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-import { CommandBody } from "../components/Async";
-import { type SummaryPayload, SummaryView } from "../components/Summary";
+import { Async } from "../components/Async";
+import { SummaryView } from "../components/Summary";
 import { loadCatalog } from "../lib/catalog";
 import { jsonOption, playerOption } from "../lib/cli-options";
 import { areaBreakdown, getPlayerProgress, tierBreakdown } from "../lib/queries";
@@ -18,8 +18,8 @@ type Props = { options: z.infer<typeof options> };
 
 export default function Summary({ options }: Props) {
   return (
-    <CommandBody<SummaryPayload>
-      run={async () => {
+    <Async
+      loader={async () => {
         const rsn = await resolvePlayer(options.player);
         const [player, catalog] = await Promise.all([getPlayerProgress(rsn), loadCatalog()]);
         return {
@@ -34,10 +34,9 @@ export default function Summary({ options }: Props) {
           levels: player.levels,
         };
       }}
+      render={SummaryView}
       json={options.json}
       loadingLabel={`Fetching ${options.player ?? "default player"}`}
-    >
-      {(data) => <SummaryView {...data} />}
-    </CommandBody>
+    />
   );
 }

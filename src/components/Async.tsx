@@ -43,16 +43,16 @@ function AsyncContent<T>({ promise, json, render }: AsyncContentProps<T>) {
   return <>{render(data)}</>;
 }
 
-type CommandBodyProps<T> = {
-  run: () => Promise<T>;
+type AsyncProps<T> = {
+  loader: () => Promise<T>;
+  render: (data: T) => ReactNode;
   json?: boolean;
   loadingLabel?: string;
-  children: (data: T) => ReactNode;
 };
 
-export function CommandBody<T>({ run, json, loadingLabel, children }: CommandBodyProps<T>) {
+export function Async<T>({ loader, render, json, loadingLabel }: AsyncProps<T>) {
   const { exit } = useApp();
-  const [promise] = useState(() => run());
+  const [promise] = useState(() => loader());
   return (
     <CommandErrorBoundary
       onError={(err) => {
@@ -61,7 +61,7 @@ export function CommandBody<T>({ run, json, loadingLabel, children }: CommandBod
       }}
     >
       <Suspense fallback={<Loading label={loadingLabel} />}>
-        <AsyncContent promise={promise} json={json ?? false} render={children} />
+        <AsyncContent promise={promise} json={json ?? false} render={render} />
       </Suspense>
     </CommandErrorBoundary>
   );

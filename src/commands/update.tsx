@@ -3,7 +3,7 @@ import { Box, Text } from "ink";
 import { option } from "pastel";
 import { z } from "zod";
 
-import { CommandBody } from "../components/Async";
+import { Async } from "../components/Async";
 
 const ROOT = path.join(import.meta.dir, "../..");
 
@@ -17,7 +17,6 @@ export const options = z.object({
 });
 
 type Step = { name: string; stdout: string; stderr: string; exitCode: number };
-type Payload = { steps: Step[] };
 
 async function run(cmd: string[]): Promise<Step> {
   const proc = Bun.spawn(cmd, { cwd: ROOT, stdout: "pipe", stderr: "pipe" });
@@ -31,11 +30,27 @@ async function run(cmd: string[]): Promise<Step> {
 
 type Props = { options: z.infer<typeof options> };
 
+function UpdateResult({ steps }: { steps: Step[] }) {
+  return (
+    <Box flexDirection="column">
+      {steps.map((s) => (
+        <Box key={s.name} flexDirection="column" marginBottom={1}>
+          <Text>
+            <Text color="green">✓</Text> <Text bold>{s.name}</Text>
+          </Text>
+          {s.stdout ? <Text color="gray">{s.stdout}</Text> : null}
+        </Box>
+      ))}
+      <Text color="gray">Done. Run `leagues --help` if new commands appeared.</Text>
+    </Box>
+  );
+}
+
 export default function Update({ options }: Props) {
   return (
-    <CommandBody<Payload>
+    <Async
       loadingLabel="Updating"
-      run={async () => {
+      loader={async () => {
         const steps: Step[] = [];
         for (const cmd of [
           ["git", "pull"],
@@ -54,20 +69,7 @@ export default function Update({ options }: Props) {
         }
         return { steps };
       }}
-    >
-      {(data) => (
-        <Box flexDirection="column">
-          {data.steps.map((s) => (
-            <Box key={s.name} flexDirection="column" marginBottom={1}>
-              <Text>
-                <Text color="green">✓</Text> <Text bold>{s.name}</Text>
-              </Text>
-              {s.stdout ? <Text color="gray">{s.stdout}</Text> : null}
-            </Box>
-          ))}
-          <Text color="gray">Done. Run `leagues --help` if new commands appeared.</Text>
-        </Box>
-      )}
-    </CommandBody>
+      render={UpdateResult}
+    />
   );
 }

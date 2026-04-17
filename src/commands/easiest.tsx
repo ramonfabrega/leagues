@@ -1,9 +1,8 @@
 import { option } from "pastel";
 import { z } from "zod";
 
-import { CommandBody } from "../components/Async";
+import { Async } from "../components/Async";
 import { TaskList } from "../components/TaskList";
-import type { Task } from "../lib/catalog";
 import { buildFilter, filterOptions, jsonOption, playerOption } from "../lib/cli-options";
 import { easiestMissing, getPlayerProgress } from "../lib/queries";
 import { resolvePlayer } from "../lib/settings";
@@ -21,19 +20,18 @@ export const options = z.object({
 });
 
 type Props = { options: z.infer<typeof options> };
-type Payload = { player: string; count: number; tasks: Task[] };
 
 export default function Easiest({ options }: Props) {
   return (
-    <CommandBody<Payload>
-      run={async () => {
+    <Async
+      loader={async () => {
         const player = await getPlayerProgress(await resolvePlayer(options.player));
         const tasks = await easiestMissing(player, await buildFilter(options), options.limit);
-        return { player: player.username, count: tasks.length, tasks };
+        const label = `Easiest missing for ${player.username}`;
+        return { label, tasks };
       }}
+      render={TaskList}
       json={options.json}
-    >
-      {(data) => <TaskList label={`Easiest missing for ${data.player}`} tasks={data.tasks} />}
-    </CommandBody>
+    />
   );
 }

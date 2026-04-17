@@ -27,9 +27,9 @@ describe("cli integration", () => {
     const { stdout, exitCode } = await runCli(["search", "--all", "--json", "Willow longbow"]);
     expect(exitCode).toBe(0);
     const obj = JSON.parse(stdout);
-    expect(obj.count).toBeGreaterThan(0);
+    expect(obj.tasks.length).toBeGreaterThan(0);
     expect(obj.tasks[0].name).toMatch(/Willow longbow/i);
-    expect(obj.player).toBeNull();
+    expect(obj.label).toBe('Search "Willow longbow" — all tasks');
   });
 
   test("leagues search (default) filters completed for defaultPlayer", async () => {
@@ -38,7 +38,7 @@ describe("cli integration", () => {
     });
     expect(exitCode).toBe(0);
     const obj = JSON.parse(stdout);
-    expect(obj.player).toBe("R amon");
+    expect(obj.label).toBe('Search "Catch a Herring" — missing for R amon');
   });
 
   test("leagues config --json dumps merged settings", async () => {

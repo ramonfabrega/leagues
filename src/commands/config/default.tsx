@@ -3,7 +3,8 @@ import { argument } from "pastel";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 
-import { CommandBody } from "../../components/Async";
+import { Async } from "@/components/Async";
+
 import { Pick } from "../../components/Pick";
 import { loadSettings, type Settings, setDefaultPlayer } from "../../lib/settings";
 
@@ -25,9 +26,10 @@ export default function SetDefault({ args }: Props) {
   const player = (args ?? []).join(" ").trim();
   if (player) {
     return (
-      <CommandBody<Settings> run={() => setDefaultPlayer(player)}>
-        {(settings) => <SuccessMessage settings={settings} />}
-      </CommandBody>
+      <Async
+        loader={() => setDefaultPlayer(player)}
+        render={(props) => <SuccessMessage settings={props} />}
+      />
     );
   }
   return <InteractivePicker />;

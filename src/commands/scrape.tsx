@@ -1,7 +1,7 @@
 import { Box, Text } from "ink";
 import { z } from "zod";
 
-import { CommandBody } from "../components/Async";
+import { Async } from "../components/Async";
 import { jsonOption } from "../lib/cli-options";
 import { scrapeAndWrite } from "../scrape";
 
@@ -13,12 +13,33 @@ export const options = z.object({
 
 type Props = { options: z.infer<typeof options> };
 
-type Payload = { league: string; source: string; scrapedAt: string; taskCount: number };
+function ScrapeResult({
+  league,
+  source,
+  scrapedAt,
+  taskCount,
+}: {
+  league: string;
+  source: string;
+  scrapedAt: string;
+  taskCount: number;
+}) {
+  return (
+    <Box flexDirection="column">
+      <Text>
+        <Text color="green">✓</Text> scraped <Text bold>{taskCount}</Text> tasks
+      </Text>
+      <Text color="gray"> league: {league}</Text>
+      <Text color="gray"> at: {scrapedAt}</Text>
+      <Text color="gray"> from: {source}</Text>
+    </Box>
+  );
+}
 
 export default function Scrape({ options }: Props) {
   return (
-    <CommandBody<Payload>
-      run={async () => {
+    <Async
+      loader={async () => {
         const catalog = await scrapeAndWrite();
         return {
           league: catalog.league,
@@ -27,19 +48,9 @@ export default function Scrape({ options }: Props) {
           taskCount: catalog.tasks.length,
         };
       }}
+      render={ScrapeResult}
       json={options.json}
       loadingLabel="Scraping wiki"
-    >
-      {(data) => (
-        <Box flexDirection="column">
-          <Text>
-            <Text color="green">✓</Text> scraped <Text bold>{data.taskCount}</Text> tasks
-          </Text>
-          <Text color="gray"> league: {data.league}</Text>
-          <Text color="gray"> at: {data.scrapedAt}</Text>
-          <Text color="gray"> from: {data.source}</Text>
-        </Box>
-      )}
-    </CommandBody>
+    />
   );
 }

@@ -3,7 +3,7 @@ import { argument } from "pastel";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 
-import { CommandBody } from "../../components/Async";
+import { Async } from "../../components/Async";
 import { Pick } from "../../components/Pick";
 import { loadSettings, removeExtraPlayer, type Settings } from "../../lib/settings";
 
@@ -22,9 +22,10 @@ export default function RemovePlayer({ args }: Props) {
   const player = (args ?? []).join(" ").trim();
   if (player) {
     return (
-      <CommandBody<Settings> run={() => removeExtraPlayer(player)}>
-        {(settings) => <SuccessMessage removed={player} settings={settings} />}
-      </CommandBody>
+      <Async
+        loader={() => removeExtraPlayer(player)}
+        render={(settings) => <SuccessMessage removed={player} settings={settings} />}
+      />
     );
   }
   return <InteractivePicker />;

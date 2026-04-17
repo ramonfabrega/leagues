@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Task } from "../lib/catalog";
 import { getPlayerProgress, type PlayerProgress, uniqueTasks } from "../lib/queries";
 import { loadSettings, resolvePlayer } from "../lib/settings";
-import { CommandBody } from "./Async";
+import { Async } from "./Async";
 import { TaskList } from "./TaskList";
 
 type Snapshot = {
@@ -47,29 +47,30 @@ function diffIds(prev: Task[], next: Task[]): { added: Task[]; removed: Task[] }
   };
 }
 
-type OncePayload = { players: string[]; snapshot: Snapshot };
+function CompareOnceResult({ players, snapshot }: { players: string[]; snapshot: Snapshot }) {
+  return (
+    <Box flexDirection="column">
+      {players.map((p) => (
+        <Box key={p} marginTop={1}>
+          <TaskList label={p} tasks={snapshot.unique[p] ?? []} showCount={false} />
+        </Box>
+      ))}
+    </Box>
+  );
+}
 
 export function CompareOnce({ args, json }: { args: string[]; json?: boolean }) {
   return (
-    <CommandBody<OncePayload>
-      run={async () => {
+    <Async
+      loader={async () => {
         const players = await resolvePlayers(args);
         const snapshot = await buildSnapshot(players);
         return { players, snapshot };
       }}
+      render={CompareOnceResult}
       json={json}
       loadingLabel="Fetching players"
-    >
-      {({ players, snapshot }) => (
-        <Box flexDirection="column">
-          {players.map((p) => (
-            <Box key={p} marginTop={1}>
-              <TaskList label={p} tasks={snapshot.unique[p] ?? []} showCount={false} />
-            </Box>
-          ))}
-        </Box>
-      )}
-    </CommandBody>
+    />
   );
 }
 

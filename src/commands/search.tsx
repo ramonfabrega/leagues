@@ -1,9 +1,8 @@
 import { argument, option } from "pastel";
 import { z } from "zod";
 
-import { CommandBody } from "../components/Async";
+import { Async } from "../components/Async";
 import { TaskList } from "../components/TaskList";
-import type { Task } from "../lib/catalog";
 import { buildFilter, jsonOption, playerOption } from "../lib/cli-options";
 import { getPlayerProgress, searchCatalog } from "../lib/queries";
 import { resolvePlayer } from "../lib/settings";
@@ -41,34 +40,25 @@ type Props = {
   options: z.infer<typeof options>;
 };
 
-type Payload = { query: string; player: string | null; count: number; tasks: Task[] };
-
 export default function Search({ args, options }: Props) {
   const query = args.join(" ").trim();
   if (!query) throw new Error("Usage: leagues search <query>");
   return (
-    <CommandBody<Payload>
-      run={async () => {
+    <Async
+      loader={async () => {
         const player = options.all
           ? null
           : await getPlayerProgress(await resolvePlayer(options.player));
         const filter = await buildFilter({ allRegions: options.all || options.allRegions });
         const matches = await searchCatalog(query, { player: player ?? undefined, filter });
         const tasks = matches.slice(0, options.limit);
-        return { query, player: player?.username ?? null, count: tasks.length, tasks };
+        const label = player
+          ? `Search "${query}" — missing for ${player.username}`
+          : `Search "${query}" — all tasks`;
+        return { label, tasks };
       }}
+      render={TaskList}
       json={options.json}
-    >
-      {(data) => (
-        <TaskList
-          label={
-            data.player
-              ? `Search "${data.query}" — missing for ${data.player}`
-              : `Search "${data.query}" — all tasks`
-          }
-          tasks={data.tasks}
-        />
-      )}
-    </CommandBody>
+    />
   );
 }
