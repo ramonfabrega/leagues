@@ -58,7 +58,6 @@ export async function loadLocalConfig(): Promise<LocalConfig | null> {
 }
 
 export async function writeLocalConfig(local: LocalConfig): Promise<void> {
-  LocalConfigSchema.parse(local);
   await Bun.write(LOCAL_CONFIG_PATH, JSON.stringify(local, null, 2) + "\n");
   cached = null;
 }

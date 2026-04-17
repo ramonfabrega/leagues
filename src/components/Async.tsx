@@ -5,7 +5,7 @@ export function Loading({ label = "Working" }: { label?: string }) {
   return <Text color="gray">{label}…</Text>;
 }
 
-export function ErrorMessage({ error }: { error: Error }) {
+function ErrorMessage({ error }: { error: Error }) {
   return <Text color="red">Error: {error.message}</Text>;
 }
 
