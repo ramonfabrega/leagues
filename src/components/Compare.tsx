@@ -2,7 +2,7 @@ import { Box, Static, Text } from "ink";
 import { useEffect, useRef, useState } from "react";
 
 import type { Task } from "../lib/catalog";
-import { getPlayerProgress, type PlayerProgress, uniqueTasks } from "../lib/queries";
+import { getPlayerProgress, uniqueTasks } from "../lib/queries";
 import { loadSettings, resolvePlayer } from "../lib/settings";
 import { Async } from "./Async";
 import { TaskList } from "./TaskList";
@@ -26,12 +26,12 @@ async function resolvePlayers(args: string[]): Promise<string[]> {
 
 async function buildSnapshot(players: string[]): Promise<Snapshot> {
   const progresses = await Promise.all(players.map((r) => getPlayerProgress(r)));
-  const byName = new Map<string, PlayerProgress>(progresses.map((p, i) => [players[i]!, p]));
   const unique: Record<string, Task[]> = {};
   const totalPoints: Record<string, number> = {};
-  for (const name of players) {
-    const target = byName.get(name)!;
-    const others = players.filter((n) => n !== name).map((n) => byName.get(n)!);
+  for (let i = 0; i < players.length; i++) {
+    const name = players[i];
+    const target = progresses[i];
+    const others = progresses.filter((_, j) => j !== i);
     unique[name] = uniqueTasks(target, others);
     totalPoints[name] = target.totalPoints;
   }
@@ -122,8 +122,8 @@ function LiveBlock({ pct, tick, stats }: { pct: number; tick: number; stats: Pla
       </Text>
       {stats.map((s, i) => (
         <Text key={s.name} color="gray">
-          {s.name.padEnd(nameW)} • {pointsStrs[i]!.padStart(pointsW)} points •{" "}
-          {countStrs[i]!.padStart(countW)} unique
+          {s.name.padEnd(nameW)} • {pointsStrs[i].padStart(pointsW)} points •{" "}
+          {countStrs[i].padStart(countW)} unique
         </Text>
       ))}
     </Box>

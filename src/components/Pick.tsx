@@ -33,7 +33,7 @@ export function Pick<T extends string>({
     if (key.upArrow || input === "k") setCursor((c) => (c - 1 + items.length) % items.length);
     else if (key.downArrow || input === "j") setCursor((c) => (c + 1) % items.length);
     else if (key.return) {
-      const value = items[cursor]!;
+      const value = items[cursor];
       setMode({ kind: "saving" });
       onPick(value)
         .then((ok) => {

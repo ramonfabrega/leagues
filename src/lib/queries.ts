@@ -1,5 +1,5 @@
 import { fetchPlayer, type PlayerData } from "./api";
-import { findTasks, loadCatalog, type Task, TIERS, type Tier, taskById } from "./catalog";
+import { findTasks, loadCatalog, type Task, type Tier, taskById } from "./catalog";
 
 export type PlayerProgress = {
   username: string;
@@ -126,8 +126,8 @@ export function pickEasiest(
   limit = 20
 ): Task[] {
   return filterMissing(catalog, player, filter)
-    .filter((t) => t.completionPct !== null)
-    .sort((a, b) => b.completionPct! - a.completionPct!)
+    .filter((t): t is Task & { completionPct: number } => t.completionPct !== null)
+    .sort((a, b) => b.completionPct - a.completionPct)
     .slice(0, limit);
 }
 
@@ -140,7 +140,13 @@ export function uniqueTasks(target: PlayerProgress, others: PlayerProgress[]): T
 export type TierBreakdown = Record<Tier, { count: number; points: number }>;
 
 export function tierBreakdown(tasks: Task[]): TierBreakdown {
-  const out = Object.fromEntries(TIERS.map((t) => [t, { count: 0, points: 0 }])) as TierBreakdown;
+  const out: TierBreakdown = {
+    easy: { count: 0, points: 0 },
+    medium: { count: 0, points: 0 },
+    hard: { count: 0, points: 0 },
+    elite: { count: 0, points: 0 },
+    master: { count: 0, points: 0 },
+  };
   for (const t of tasks) {
     out[t.tier].count++;
     out[t.tier].points += t.points;

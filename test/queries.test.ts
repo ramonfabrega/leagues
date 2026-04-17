@@ -50,49 +50,49 @@ const catalog = [
 
 describe("matchesFilter", () => {
   test("tier filter", () => {
-    expect(matchesFilter(catalog[1]!, { tier: "medium" })).toBe(true);
-    expect(matchesFilter(catalog[1]!, { tier: "easy" })).toBe(false);
+    expect(matchesFilter(catalog[1], { tier: "medium" })).toBe(true);
+    expect(matchesFilter(catalog[1], { tier: "easy" })).toBe(false);
   });
 
   test("skill filter (case-insensitive)", () => {
-    expect(matchesFilter(catalog[1]!, { skill: "FLETCHING" })).toBe(true);
-    expect(matchesFilter(catalog[0]!, { skill: "Fletching" })).toBe(false);
+    expect(matchesFilter(catalog[1], { skill: "FLETCHING" })).toBe(true);
+    expect(matchesFilter(catalog[0], { skill: "Fletching" })).toBe(false);
   });
 
   test("points range", () => {
-    expect(matchesFilter(catalog[1]!, { maxPoints: 50 })).toBe(true);
-    expect(matchesFilter(catalog[2]!, { maxPoints: 50 })).toBe(false);
-    expect(matchesFilter(catalog[2]!, { minPoints: 50 })).toBe(true);
+    expect(matchesFilter(catalog[1], { maxPoints: 50 })).toBe(true);
+    expect(matchesFilter(catalog[2], { maxPoints: 50 })).toBe(false);
+    expect(matchesFilter(catalog[2], { minPoints: 50 })).toBe(true);
   });
 
   test("completion % range excludes null completionPct", () => {
-    expect(matchesFilter(catalog[4]!, { minCompletionPct: 0 })).toBe(false);
+    expect(matchesFilter(catalog[4], { minCompletionPct: 0 })).toBe(false);
   });
 
   test("pactOnly", () => {
-    expect(matchesFilter(catalog[4]!, { pactOnly: true })).toBe(true);
-    expect(matchesFilter(catalog[0]!, { pactOnly: true })).toBe(false);
+    expect(matchesFilter(catalog[4], { pactOnly: true })).toBe(true);
+    expect(matchesFilter(catalog[0], { pactOnly: true })).toBe(false);
   });
 
   test("area is case-insensitive", () => {
-    expect(matchesFilter(catalog[3]!, { area: "Tirannwn" })).toBe(true);
-    expect(matchesFilter(catalog[3]!, { area: "general" })).toBe(false);
+    expect(matchesFilter(catalog[3], { area: "Tirannwn" })).toBe(true);
+    expect(matchesFilter(catalog[3], { area: "general" })).toBe(false);
   });
 
   test("areas set matches any (case-insensitive)", () => {
-    expect(matchesFilter(catalog[3]!, { areas: ["general", "Tirannwn"] })).toBe(true);
-    expect(matchesFilter(catalog[3]!, { areas: ["general", "kourend"] })).toBe(false);
-    expect(matchesFilter(catalog[0]!, { areas: ["general"] })).toBe(true);
+    expect(matchesFilter(catalog[3], { areas: ["general", "Tirannwn"] })).toBe(true);
+    expect(matchesFilter(catalog[3], { areas: ["general", "kourend"] })).toBe(false);
+    expect(matchesFilter(catalog[0], { areas: ["general"] })).toBe(true);
   });
 
   test("empty areas array is treated as no filter", () => {
-    expect(matchesFilter(catalog[3]!, { areas: [] })).toBe(true);
+    expect(matchesFilter(catalog[3], { areas: [] })).toBe(true);
   });
 });
 
 describe("filterMissing", () => {
   test("excludes completed tasks", () => {
-    const player = progress({ username: "rmn", completed: [catalog[0]!, catalog[1]!] });
+    const player = progress({ username: "rmn", completed: [catalog[0], catalog[1]] });
     const missing = filterMissing(catalog, player);
     expect(missing.map((t) => t.id)).toEqual([3, 4, 5]);
   });
@@ -114,9 +114,9 @@ describe("pickEasiest", () => {
 
 describe("uniqueTasks", () => {
   test("N-way unique set", () => {
-    const a = progress({ username: "a", completed: [catalog[0]!, catalog[1]!, catalog[2]!] });
-    const b = progress({ username: "b", completed: [catalog[1]!, catalog[3]!] });
-    const c = progress({ username: "c", completed: [catalog[2]!] });
+    const a = progress({ username: "a", completed: [catalog[0], catalog[1], catalog[2]] });
+    const b = progress({ username: "b", completed: [catalog[1], catalog[3]] });
+    const c = progress({ username: "c", completed: [catalog[2]] });
     expect(uniqueTasks(a, [b, c]).map((t) => t.id)).toEqual([1]);
   });
 });

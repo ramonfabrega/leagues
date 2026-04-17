@@ -40,8 +40,9 @@ export function TaskList({
   }
   const grouped = new Map<string, Task[]>();
   for (const t of tasks) {
-    if (!grouped.has(t.tier)) grouped.set(t.tier, []);
-    grouped.get(t.tier)!.push(t);
+    const list = grouped.get(t.tier);
+    if (list) list.push(t);
+    else grouped.set(t.tier, [t]);
   }
   return (
     <Box flexDirection="column">
@@ -55,7 +56,7 @@ export function TaskList({
         return (
           <Box key={tier} flexDirection="column" marginTop={1}>
             <Text color={tierColor(tier)} bold>
-              {tier} · {group[0]!.points}pts · {group.length} task{group.length === 1 ? "" : "s"}
+              {tier} · {group[0].points}pts · {group.length} task{group.length === 1 ? "" : "s"}
             </Text>
             {group.map((t) => {
               const reqs = formatReqs(t);

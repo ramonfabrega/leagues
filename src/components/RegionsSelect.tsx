@@ -18,7 +18,7 @@ export function RegionsSelect({ initial }: { initial: Region[] }) {
     if (key.upArrow || input === "k") setCursor((c) => (c - 1 + REGIONS.length) % REGIONS.length);
     else if (key.downArrow || input === "j") setCursor((c) => (c + 1) % REGIONS.length);
     else if (input === " ") {
-      const r = REGIONS[cursor]!;
+      const r = REGIONS[cursor];
       if (ALWAYS_UNLOCKED.includes(r)) return;
       setSelected((prev) => {
         const next = new Set(prev);

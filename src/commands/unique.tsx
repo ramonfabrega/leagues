@@ -33,13 +33,13 @@ export default function UniqueCmd({ options }: Props) {
         const vsNames = options.vs?.length
           ? await Promise.all(options.vs.map((s) => resolvePlayer(s.trim())))
           : await otherPlayers(targetName);
-        const [target, ...others] = await Promise.all(
-          [targetName, ...vsNames].map(getPlayerProgress)
-        );
-        const tasks = uniqueTasks(target!, others);
+        const [target, others] = await Promise.all([
+          getPlayerProgress(targetName),
+          Promise.all(vsNames.map(getPlayerProgress)),
+        ]);
         return {
-          label: `${target!.username} unique vs [${vsNames.join(", ")}]`,
-          tasks,
+          label: `${target.username} unique vs [${vsNames.join(", ")}]`,
+          tasks: uniqueTasks(target, others),
         };
       }}
       render={TaskList}

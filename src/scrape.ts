@@ -3,6 +3,21 @@ import { JSDOM } from "jsdom";
 import { fetchTasksPage } from "./lib/api";
 import { type Catalog, type Task, TIERS, type Tier, writeCatalog } from "./lib/catalog";
 
+const TIER_SET: ReadonlySet<string> = new Set(TIERS);
+function isTier(s: string): s is Tier {
+  return TIER_SET.has(s);
+}
+
+const TEXT_NODE = 3;
+
+function collectTextExcluding(root: Node, skip: ReadonlySet<Node>): string {
+  if (skip.has(root)) return "";
+  if (root.nodeType === TEXT_NODE) return root.textContent ?? "";
+  let out = "";
+  for (const child of root.childNodes) out += collectTextExcluding(child, skip);
+  return out;
+}
+
 export function parseTasksHtml(html: string): Task[] {
   const dom = new JSDOM(html);
   const rows = dom.window.document.querySelectorAll<HTMLTableRowElement>("tr[data-taskid]");
@@ -35,8 +50,9 @@ function parseRow(row: HTMLTableRowElement): Task | null {
   const id = Number(row.getAttribute("data-taskid"));
   if (!Number.isFinite(id)) return null;
 
-  const tier = row.getAttribute("data-league-tier") as Tier | null;
-  if (!tier || !TIERS.includes(tier)) return null;
+  const rawTier = row.getAttribute("data-league-tier");
+  if (rawTier === null || !isTier(rawTier)) return null;
+  const tier: Tier = rawTier;
 
   const points = Number(row.getAttribute("data-league-points") ?? "0");
   const area = row.getAttribute("data-league-area-for-filtering") ?? "unknown";
@@ -63,14 +79,13 @@ function parseRequirements(cell: Element | null): Task["requirements"] {
     })
   );
 
-  // Extract non-skill text (e.g. "1,064 CA points", "Completion of Vale Totems") by removing ALL scp spans.
-  const clone = cell.cloneNode(true) as Element;
-  for (const el of clone.querySelectorAll("span.scp")) el.remove();
-  const rawOther =
-    clone.textContent
-      ?.replace(/\s+/g, " ")
-      .replace(/^[,\s]+|[,\s]+$/g, "")
-      .trim() ?? "";
+  // Extract non-skill text (e.g. "1,064 CA points", "Completion of Vale Totems") by walking
+  // text nodes and skipping any descendants of scp spans (the skill badges parsed above).
+  const scpSpans = new Set<Node>(cell.querySelectorAll("span.scp"));
+  const rawOther = collectTextExcluding(cell, scpSpans)
+    .replace(/\s+/g, " ")
+    .replace(/^[,\s]+|[,\s]+$/g, "")
+    .trim();
   const other = rawOther && rawOther !== "N/A" ? rawOther : null;
 
   return { skills, other };
