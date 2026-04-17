@@ -1,5 +1,6 @@
-import { Text, Box } from "ink";
-import { TIERS, type Task } from "../lib/catalog";
+import { Box, Text } from "ink";
+
+import { type Task, TIERS } from "../lib/catalog";
 import { tierColor } from "./TierLabel";
 
 function completionColor(pct: number | null): string {
@@ -44,7 +45,10 @@ export function TaskList({
   }
   return (
     <Box flexDirection="column">
-      <Text bold underline>{label}{showCount ? ` (${tasks.length})` : ""}</Text>
+      <Text bold underline>
+        {label}
+        {showCount ? ` (${tasks.length})` : ""}
+      </Text>
       {TIERS.map((tier) => {
         const group = grouped.get(tier);
         if (!group?.length) return null;

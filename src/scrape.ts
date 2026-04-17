@@ -1,18 +1,11 @@
 import { JSDOM } from "jsdom";
+
 import { fetchTasksPage } from "./lib/api";
-import {
-  writeCatalog,
-  TIERS,
-  type Catalog,
-  type Task,
-  type Tier,
-} from "./lib/catalog";
+import { type Catalog, type Task, TIERS, type Tier, writeCatalog } from "./lib/catalog";
 
 export function parseTasksHtml(html: string): Task[] {
   const dom = new JSDOM(html);
-  const rows = dom.window.document.querySelectorAll<HTMLTableRowElement>(
-    "tr[data-taskid]"
-  );
+  const rows = dom.window.document.querySelectorAll<HTMLTableRowElement>("tr[data-taskid]");
   const tasks: Task[] = [];
   rows.forEach((row) => {
     const task = parseRow(row);
@@ -63,15 +56,21 @@ function parseRow(row: HTMLTableRowElement): Task | null {
 function parseRequirements(cell: Element | null): Task["requirements"] {
   if (!cell) return { skills: [], other: null };
   // Skill reqs have both data-skill AND data-level. Level-less scp spans (e.g. miniquest badges) are decorative.
-  const skills = Array.from(cell.querySelectorAll("span.scp[data-skill][data-level]")).map((el) => ({
-    skill: el.getAttribute("data-skill") ?? "",
-    level: Number(el.getAttribute("data-level")),
-  }));
+  const skills = Array.from(cell.querySelectorAll("span.scp[data-skill][data-level]")).map(
+    (el) => ({
+      skill: el.getAttribute("data-skill") ?? "",
+      level: Number(el.getAttribute("data-level")),
+    })
+  );
 
   // Extract non-skill text (e.g. "1,064 CA points", "Completion of Vale Totems") by removing ALL scp spans.
   const clone = cell.cloneNode(true) as Element;
-  clone.querySelectorAll("span.scp").forEach((el) => el.remove());
-  const rawOther = clone.textContent?.replace(/\s+/g, " ").replace(/^[,\s]+|[,\s]+$/g, "").trim() ?? "";
+  for (const el of clone.querySelectorAll("span.scp")) el.remove();
+  const rawOther =
+    clone.textContent
+      ?.replace(/\s+/g, " ")
+      .replace(/^[,\s]+|[,\s]+$/g, "")
+      .trim() ?? "";
   const other = rawOther && rawOther !== "N/A" ? rawOther : null;
 
   return { skills, other };

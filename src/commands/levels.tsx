@@ -1,10 +1,11 @@
-import { z } from "zod";
 import { option } from "pastel";
-import { loadSettings, resolvePlayer } from "../lib/settings";
-import { getPlayerProgress, levelGaps, type LevelDiff } from "../lib/queries";
+import { z } from "zod";
+
 import { CommandBody } from "../components/Async";
 import { LevelGapsView } from "../components/LevelGaps";
 import { jsonOption } from "../lib/cli-options";
+import { getPlayerProgress, type LevelDiff, levelGaps } from "../lib/queries";
+import { loadSettings, resolvePlayer } from "../lib/settings";
 
 export const description = "Level gaps between players (default: all configured players)";
 

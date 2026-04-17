@@ -1,14 +1,11 @@
 import { z } from "zod";
-import { resolvePlayer } from "../lib/settings";
-import {
-  getPlayerProgress,
-  tierBreakdown,
-  areaBreakdown,
-} from "../lib/queries";
-import { loadCatalog } from "../lib/catalog";
+
 import { CommandBody } from "../components/Async";
-import { SummaryView, type SummaryPayload } from "../components/Summary";
+import { type SummaryPayload, SummaryView } from "../components/Summary";
+import { loadCatalog } from "../lib/catalog";
 import { jsonOption, playerOption } from "../lib/cli-options";
+import { areaBreakdown, getPlayerProgress, tierBreakdown } from "../lib/queries";
+import { resolvePlayer } from "../lib/settings";
 
 export const description = "Task count, points, tier/area breakdown for a player";
 

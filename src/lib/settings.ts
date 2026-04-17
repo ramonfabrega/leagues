@@ -1,6 +1,7 @@
-import path from "node:path";
 import { unlink } from "node:fs/promises";
+import path from "node:path";
 import { z } from "zod";
+
 import { REGIONS, type Region } from "./catalog";
 
 const ROOT = path.join(import.meta.dir, "../..");
@@ -122,7 +123,9 @@ async function readProjectConfig(): Promise<ProjectConfig> {
   if (!parsed.success) {
     throw new Error(`leagues.config.json is invalid:\n${z.prettifyError(parsed.error)}`);
   }
-  if (!parsed.data.players.some((p) => p.toLowerCase() === parsed.data.defaultPlayer.toLowerCase())) {
+  if (
+    !parsed.data.players.some((p) => p.toLowerCase() === parsed.data.defaultPlayer.toLowerCase())
+  ) {
     throw new Error(
       `leagues.config.json: defaultPlayer "${parsed.data.defaultPlayer}" is not in players list`
     );
@@ -141,7 +144,7 @@ async function readLocalConfig(): Promise<LocalConfig | null> {
 }
 
 async function writeLocal(local: LocalConfig): Promise<Settings> {
-  await Bun.write(LOCAL_CONFIG_PATH, JSON.stringify(local, null, 2) + "\n");
+  await Bun.write(LOCAL_CONFIG_PATH, `${JSON.stringify(local, null, 2)}\n`);
   cached = null;
   return await loadSettings();
 }

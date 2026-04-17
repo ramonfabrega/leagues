@@ -1,9 +1,10 @@
-import { z } from "zod";
-import { useState, useEffect } from "react";
 import { Text } from "ink";
-import { loadSettings } from "../../lib/settings";
+import { useEffect, useState } from "react";
+import { z } from "zod";
+
 import { RegionsSelect } from "../../components/RegionsSelect";
 import type { Region } from "../../lib/catalog";
+import { loadSettings } from "../../lib/settings";
 
 export const description = "Toggle unlocked regions interactively (writes leagues.local.json)";
 

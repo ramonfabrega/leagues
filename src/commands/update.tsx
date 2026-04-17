@@ -1,7 +1,8 @@
-import { z } from "zod";
-import { option } from "pastel";
-import { Text, Box } from "ink";
 import path from "node:path";
+import { Box, Text } from "ink";
+import { option } from "pastel";
+import { z } from "zod";
+
 import { CommandBody } from "../components/Async";
 
 const ROOT = path.join(import.meta.dir, "../..");
@@ -36,7 +37,10 @@ export default function Update({ options }: Props) {
       loadingLabel="Updating"
       run={async () => {
         const steps: Step[] = [];
-        for (const cmd of [["git", "pull"], ["bun", "install"]]) {
+        for (const cmd of [
+          ["git", "pull"],
+          ["bun", "install"],
+        ]) {
           const step = await run(cmd);
           steps.push(step);
           if (step.exitCode !== 0) {

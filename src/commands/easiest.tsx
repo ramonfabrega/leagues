@@ -1,17 +1,21 @@
-import { z } from "zod";
 import { option } from "pastel";
-import { resolvePlayer } from "../lib/settings";
-import { easiestMissing, getPlayerProgress } from "../lib/queries";
-import type { Task } from "../lib/catalog";
+import { z } from "zod";
+
 import { CommandBody } from "../components/Async";
 import { TaskList } from "../components/TaskList";
+import type { Task } from "../lib/catalog";
 import { buildFilter, filterOptions, jsonOption, playerOption } from "../lib/cli-options";
+import { easiestMissing, getPlayerProgress } from "../lib/queries";
+import { resolvePlayer } from "../lib/settings";
 
 export const description = "Missing tasks ranked by highest wiki completion % (likely easiest)";
 
 export const options = z.object({
   player: playerOption,
-  limit: z.number().default(20).describe(option({ description: "Cap result count" })),
+  limit: z
+    .number()
+    .default(20)
+    .describe(option({ description: "Cap result count" })),
   json: jsonOption,
   ...filterOptions,
 });

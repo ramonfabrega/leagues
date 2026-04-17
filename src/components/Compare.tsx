@@ -1,10 +1,11 @@
+import { Box, Static, Text } from "ink";
 import { useEffect, useRef, useState } from "react";
-import { Text, Box, Static } from "ink";
-import { loadSettings, resolvePlayer } from "../lib/settings";
-import { getPlayerProgress, uniqueTasks, type PlayerProgress } from "../lib/queries";
+
 import type { Task } from "../lib/catalog";
-import { TaskList } from "./TaskList";
+import { getPlayerProgress, type PlayerProgress, uniqueTasks } from "../lib/queries";
+import { loadSettings, resolvePlayer } from "../lib/settings";
 import { CommandBody } from "./Async";
+import { TaskList } from "./TaskList";
 
 type Snapshot = {
   unique: Record<string, Task[]>;
@@ -16,7 +17,9 @@ async function resolvePlayers(args: string[]): Promise<string[]> {
   if (args.length >= 2) return await Promise.all(args.map(resolvePlayer));
   const { players } = await loadSettings();
   if (players.length < 2) {
-    throw new Error("compare needs at least 2 players (pass them as args or configure them via leagues config)");
+    throw new Error(
+      "compare needs at least 2 players (pass them as args or configure them via leagues config)"
+    );
   }
   return [...players];
 }
@@ -118,7 +121,8 @@ function LiveBlock({ pct, tick, stats }: { pct: number; tick: number; stats: Pla
       </Text>
       {stats.map((s, i) => (
         <Text key={s.name} color="gray">
-          {s.name.padEnd(nameW)}  •  {pointsStrs[i]!.padStart(pointsW)} points  •  {countStrs[i]!.padStart(countW)} unique
+          {s.name.padEnd(nameW)} • {pointsStrs[i]!.padStart(pointsW)} points •{" "}
+          {countStrs[i]!.padStart(countW)} unique
         </Text>
       ))}
     </Box>
@@ -139,28 +143,37 @@ function LogEntryView({ entry, nameW }: { entry: LogEntry; nameW: number }) {
     );
   }
   if (entry.kind === "change") {
-    const rows: { sign: "+" | "-"; player: string; points: number; task: string; key: string }[] = [];
+    const rows: { sign: "+" | "-"; player: string; points: number; task: string; key: string }[] =
+      [];
     for (const c of entry.changes) {
-      for (const t of c.added) rows.push({ sign: "+", player: c.player, points: t.points, task: t.name, key: `a${t.id}` });
-      for (const t of c.removed) rows.push({ sign: "-", player: c.player, points: t.points, task: t.name, key: `r${t.id}` });
+      for (const t of c.added)
+        rows.push({ sign: "+", player: c.player, points: t.points, task: t.name, key: `a${t.id}` });
+      for (const t of c.removed)
+        rows.push({ sign: "-", player: c.player, points: t.points, task: t.name, key: `r${t.id}` });
     }
     return (
       <Box flexDirection="column">
         {rows.map((r) => (
           <Text key={r.key}>
             <Text color="gray">{timeOf(entry.at)}</Text>
-            {"  "}{r.player.padEnd(nameW)}{"  "}
+            {"  "}
+            {r.player.padEnd(nameW)}
+            {"  "}
             <Text color={r.sign === "+" ? "green" : "magenta"}>
-              {r.sign}{r.points.toString().padStart(3)}pts
+              {r.sign}
+              {r.points.toString().padStart(3)}pts
             </Text>
-            {"  "}{r.task}
+            {"  "}
+            {r.task}
           </Text>
         ))}
       </Box>
     );
   }
   return (
-    <Text color="red">{timeOf(entry.at)}  error  {entry.message}</Text>
+    <Text color="red">
+      {timeOf(entry.at)} error {entry.message}
+    </Text>
   );
 }
 
@@ -228,8 +241,7 @@ export function CompareWatch({ args, intervalMs }: { args: string[]; intervalMs:
       if (pollHandle) clearInterval(pollHandle);
       clearInterval(barHandle);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [intervalMs, args]);
 
   if (fatal) return <Text color="red">Error: {fatal.message}</Text>;
   if (!players) return <Text color="gray">loading settings…</Text>;
@@ -239,7 +251,9 @@ export function CompareWatch({ args, intervalMs }: { args: string[]; intervalMs:
 
   return (
     <>
-      <Static items={log}>{(entry) => <LogEntryView key={entry.id} entry={entry} nameW={nameW} />}</Static>
+      <Static items={log}>
+        {(entry) => <LogEntryView key={entry.id} entry={entry} nameW={nameW} />}
+      </Static>
       <Box marginTop={1}>
         <LiveBlock pct={pct} tick={tick} stats={statsFrom(players, snapshot)} />
       </Box>

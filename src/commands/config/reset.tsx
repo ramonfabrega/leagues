@@ -1,7 +1,8 @@
-import { z } from "zod";
 import { Text } from "ink";
-import { resetLocalConfig } from "../../lib/settings";
+import { z } from "zod";
+
 import { CommandBody } from "../../components/Async";
+import { resetLocalConfig } from "../../lib/settings";
 
 export const description = "Delete leagues.local.json and fall back to project defaults";
 
@@ -14,7 +15,9 @@ export default function Reset() {
     >
       {(data) =>
         data.removed ? (
-          <Text><Text color="magenta">✗</Text> removed leagues.local.json</Text>
+          <Text>
+            <Text color="magenta">✗</Text> removed leagues.local.json
+          </Text>
         ) : (
           <Text color="gray">(no leagues.local.json to remove)</Text>
         )

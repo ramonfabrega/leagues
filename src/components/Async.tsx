@@ -1,5 +1,5 @@
-import { Component, Suspense, use, useEffect, useState, type ReactNode } from "react";
 import { Text, useApp } from "ink";
+import { Component, type ReactNode, Suspense, use, useEffect, useState } from "react";
 
 function Loading({ label = "Working" }: { label?: string }) {
   return <Text color="gray">{label}…</Text>;
@@ -36,7 +36,7 @@ function AsyncContent<T>({ promise, json, render }: AsyncContentProps<T>) {
   const data = use(promise);
   const { exit } = useApp();
   useEffect(() => {
-    if (json) process.stdout.write(JSON.stringify(data, null, 2) + "\n");
+    if (json) process.stdout.write(`${JSON.stringify(data, null, 2)}\n`);
     exit();
   }, [exit, json, data]);
   if (json) return null;

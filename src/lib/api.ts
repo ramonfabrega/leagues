@@ -1,14 +1,13 @@
 import path from "node:path";
 import { z } from "zod";
+
 import { loadSettings } from "./settings";
 
 const USER_AGENT = "leagues-cli/1.0";
 
 export const PlayerDataSchema = z.object({
   username: z.string(),
-  league_tasks: z
-    .array(z.union([z.string(), z.number()]))
-    .transform((arr) => arr.map(String)),
+  league_tasks: z.array(z.union([z.string(), z.number()])).transform((arr) => arr.map(String)),
   levels: z.record(z.string(), z.number()),
 });
 

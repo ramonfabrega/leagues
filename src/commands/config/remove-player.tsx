@@ -1,17 +1,20 @@
-import { z } from "zod";
-import { useEffect, useState } from "react";
+import { Box, Text } from "ink";
 import { argument } from "pastel";
-import { Text, Box } from "ink";
-import { loadSettings, removeExtraPlayer, type Settings } from "../../lib/settings";
+import { useEffect, useState } from "react";
+import { z } from "zod";
+
 import { CommandBody } from "../../components/Async";
 import { Pick } from "../../components/Pick";
+import { loadSettings, removeExtraPlayer, type Settings } from "../../lib/settings";
 
 export const description = "Remove a player from your personal extraPlayers list";
 
 export const args = z
   .array(z.string())
   .optional()
-  .describe(argument({ name: "player", description: "Player RSN to remove (omit for interactive picker)" }));
+  .describe(
+    argument({ name: "player", description: "Player RSN to remove (omit for interactive picker)" })
+  );
 
 type Props = { args: z.infer<typeof args> };
 
@@ -19,9 +22,7 @@ export default function RemovePlayer({ args }: Props) {
   const player = (args ?? []).join(" ").trim();
   if (player) {
     return (
-      <CommandBody<Settings>
-        run={() => removeExtraPlayer(player)}
-      >
+      <CommandBody<Settings> run={() => removeExtraPlayer(player)}>
         {(settings) => <SuccessMessage removed={player} settings={settings} />}
       </CommandBody>
     );
@@ -59,7 +60,7 @@ function SuccessMessage({ removed, settings }: { removed: string; settings: Sett
       <Text>
         <Text color="magenta">✗</Text> removed <Text bold>{removed}</Text>
       </Text>
-      <Text color="gray">  wrote {settings.sources.local}</Text>
+      <Text color="gray"> wrote {settings.sources.local}</Text>
     </Box>
   );
 }

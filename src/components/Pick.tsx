@@ -1,5 +1,5 @@
-import { useState, type ReactNode } from "react";
-import { Text, Box, useApp, useInput } from "ink";
+import { Box, Text, useApp, useInput } from "ink";
+import { type ReactNode, useState } from "react";
 
 type Mode =
   | { kind: "picking" }
@@ -62,14 +62,16 @@ export function Pick<T extends string>({
   return (
     <Box flexDirection="column">
       <Text bold>{label}</Text>
-      <Text color="gray">  {instruction ?? "↑/↓ move · enter confirm · esc cancel"}</Text>
+      <Text color="gray"> {instruction ?? "↑/↓ move · enter confirm · esc cancel"}</Text>
       <Box marginTop={1} flexDirection="column">
         {items.map((item, i) => {
           const isCursor = i === cursor;
           return (
             <Text key={item}>
               <Text color={isCursor ? "cyan" : undefined}>{isCursor ? "› " : "  "}</Text>
-              <Text color={isCursor ? "cyan" : undefined} bold={isCursor}>{item}</Text>
+              <Text color={isCursor ? "cyan" : undefined} bold={isCursor}>
+                {item}
+              </Text>
             </Text>
           );
         })}

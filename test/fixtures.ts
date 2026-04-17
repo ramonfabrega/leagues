@@ -1,5 +1,5 @@
-import type { PlayerProgress } from "../src/lib/queries";
 import type { Task } from "../src/lib/catalog";
+import type { PlayerProgress } from "../src/lib/queries";
 
 export function task(partial: Partial<Task> & Pick<Task, "id" | "name" | "tier" | "points">): Task {
   return {
@@ -15,7 +15,9 @@ export function task(partial: Partial<Task> & Pick<Task, "id" | "name" | "tier" 
   };
 }
 
-export function progress(partial: Partial<PlayerProgress> & Pick<PlayerProgress, "username">): PlayerProgress {
+export function progress(
+  partial: Partial<PlayerProgress> & Pick<PlayerProgress, "username">
+): PlayerProgress {
   const completed = partial.completed ?? [];
   return {
     username: partial.username,

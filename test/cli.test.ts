@@ -1,4 +1,4 @@
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import path from "node:path";
 
 const CLI = path.join(import.meta.dir, "../src/cli.tsx");
@@ -33,10 +33,9 @@ describe("cli integration", () => {
   });
 
   test("leagues search (default) filters completed for defaultPlayer", async () => {
-    const { stdout, exitCode } = await runCli(
-      ["search", "--json", "Catch a Herring"],
-      { LEAGUES_FIXTURE_DIR: FIXTURE_DIR }
-    );
+    const { stdout, exitCode } = await runCli(["search", "--json", "Catch a Herring"], {
+      LEAGUES_FIXTURE_DIR: FIXTURE_DIR,
+    });
     expect(exitCode).toBe(0);
     const obj = JSON.parse(stdout);
     expect(obj.player).toBe("R amon");
@@ -64,23 +63,21 @@ describe("cli integration", () => {
   // These catch regressions in network-touching commands like compare/summary
   // without needing real HTTP.
   test("leagues compare --json renders through the full pipeline", async () => {
-    const { stdout, exitCode } = await runCli(
-      ["compare", "--json", "R amon", "greenbay420"],
-      { LEAGUES_FIXTURE_DIR: FIXTURE_DIR }
-    );
+    const { stdout, exitCode } = await runCli(["compare", "--json", "R amon", "greenbay420"], {
+      LEAGUES_FIXTURE_DIR: FIXTURE_DIR,
+    });
     expect(exitCode).toBe(0);
     const obj = JSON.parse(stdout);
     expect(obj.players).toEqual(["R amon", "greenbay420"]);
     expect(obj.snapshot).toBeDefined();
     expect(Array.isArray(obj.snapshot.unique["R amon"])).toBe(true);
-    expect(Array.isArray(obj.snapshot.unique["greenbay420"])).toBe(true);
+    expect(Array.isArray(obj.snapshot.unique.greenbay420)).toBe(true);
   });
 
   test("leagues summary --json reports totals", async () => {
-    const { stdout, exitCode } = await runCli(
-      ["summary", "--json", "--player", "R amon"],
-      { LEAGUES_FIXTURE_DIR: FIXTURE_DIR }
-    );
+    const { stdout, exitCode } = await runCli(["summary", "--json", "--player", "R amon"], {
+      LEAGUES_FIXTURE_DIR: FIXTURE_DIR,
+    });
     expect(exitCode).toBe(0);
     const obj = JSON.parse(stdout);
     expect(obj.username).toBe("R amon");

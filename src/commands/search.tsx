@@ -1,11 +1,12 @@
+import { argument, option } from "pastel";
 import { z } from "zod";
-import { option, argument } from "pastel";
-import { type Task } from "../lib/catalog";
-import { resolvePlayer } from "../lib/settings";
-import { getPlayerProgress, searchCatalog } from "../lib/queries";
+
 import { CommandBody } from "../components/Async";
 import { TaskList } from "../components/TaskList";
+import type { Task } from "../lib/catalog";
 import { buildFilter, jsonOption, playerOption } from "../lib/cli-options";
+import { getPlayerProgress, searchCatalog } from "../lib/queries";
+import { resolvePlayer } from "../lib/settings";
 
 export const description = "Full-text search over task name + description";
 
@@ -14,10 +15,24 @@ export const args = z.array(
 );
 
 export const options = z.object({
-  limit: z.number().default(50).describe(option({ description: "Cap result count" })),
+  limit: z
+    .number()
+    .default(50)
+    .describe(option({ description: "Cap result count" })),
   player: playerOption,
-  all: z.boolean().default(false).describe(option({ description: "Include completed tasks and ignore unlockedRegions filter", alias: "a" })),
-  allRegions: z.boolean().default(false).describe(option({ description: "Ignore unlockedRegions filter" })),
+  all: z
+    .boolean()
+    .default(false)
+    .describe(
+      option({
+        description: "Include completed tasks and ignore unlockedRegions filter",
+        alias: "a",
+      })
+    ),
+  allRegions: z
+    .boolean()
+    .default(false)
+    .describe(option({ description: "Ignore unlockedRegions filter" })),
   json: jsonOption,
 });
 

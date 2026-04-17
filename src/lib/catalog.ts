@@ -65,7 +65,7 @@ export async function loadCatalog(): Promise<Catalog> {
 }
 
 export async function writeCatalog(catalog: Catalog): Promise<void> {
-  await Bun.write(CATALOG_PATH, JSON.stringify(catalog, null, 2) + "\n");
+  await Bun.write(CATALOG_PATH, `${JSON.stringify(catalog, null, 2)}\n`);
   cached = catalog;
   cachedById = null;
 }

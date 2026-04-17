@@ -1,5 +1,5 @@
 import { fetchPlayer, type PlayerData } from "./api";
-import { findTasks, loadCatalog, taskById, TIERS, type Task, type Tier } from "./catalog";
+import { findTasks, loadCatalog, type Task, TIERS, type Tier, taskById } from "./catalog";
 
 export type PlayerProgress = {
   username: string;
@@ -105,9 +105,7 @@ export function matchesFilter(task: Task, filter: TaskFilter): boolean {
   }
   if (filter.skill) {
     const s = filter.skill.toLowerCase();
-    const hasSkillReq = task.requirements.skills.some(
-      (r) => r.skill.toLowerCase() === s
-    );
+    const hasSkillReq = task.requirements.skills.some((r) => r.skill.toLowerCase() === s);
     if (!hasSkillReq) return false;
   }
   return true;
@@ -118,9 +116,7 @@ export function filterMissing(
   player: PlayerProgress,
   filter: TaskFilter = {}
 ): Task[] {
-  return catalog.filter(
-    (t) => !player.completedTaskIds.has(t.id) && matchesFilter(t, filter)
-  );
+  return catalog.filter((t) => !player.completedTaskIds.has(t.id) && matchesFilter(t, filter));
 }
 
 export function pickEasiest(
@@ -135,10 +131,7 @@ export function pickEasiest(
     .slice(0, limit);
 }
 
-export function uniqueTasks(
-  target: PlayerProgress,
-  others: PlayerProgress[]
-): Task[] {
+export function uniqueTasks(target: PlayerProgress, others: PlayerProgress[]): Task[] {
   const otherIds = new Set<number>();
   for (const o of others) for (const id of o.completedTaskIds) otherIds.add(id);
   return target.completed.filter((t) => !otherIds.has(t.id));
@@ -147,9 +140,7 @@ export function uniqueTasks(
 export type TierBreakdown = Record<Tier, { count: number; points: number }>;
 
 export function tierBreakdown(tasks: Task[]): TierBreakdown {
-  const out = Object.fromEntries(
-    TIERS.map((t) => [t, { count: 0, points: 0 }])
-  ) as TierBreakdown;
+  const out = Object.fromEntries(TIERS.map((t) => [t, { count: 0, points: 0 }])) as TierBreakdown;
   for (const t of tasks) {
     out[t.tier].count++;
     out[t.tier].points += t.points;

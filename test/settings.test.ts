@@ -1,11 +1,12 @@
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
+
 import {
-  effectiveUnlockedRegions,
-  mergeSettings,
-  ProjectConfigSchema,
-  LocalConfigSchema,
   ALWAYS_UNLOCKED,
+  effectiveUnlockedRegions,
+  LocalConfigSchema,
+  mergeSettings,
   type ProjectConfig,
+  ProjectConfigSchema,
 } from "../src/lib/settings";
 
 const project: ProjectConfig = {
@@ -39,7 +40,9 @@ describe("mergeSettings", () => {
   });
 
   test("local defaultPlayer must exist in merged players", () => {
-    expect(() => mergeSettings(project, { defaultPlayer: "Ghost" })).toThrow(/not in the merged players/);
+    expect(() => mergeSettings(project, { defaultPlayer: "Ghost" })).toThrow(
+      /not in the merged players/
+    );
   });
 
   test("local defaultPlayer can point at an extraPlayer", () => {

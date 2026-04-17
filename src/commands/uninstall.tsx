@@ -1,6 +1,7 @@
-import { z } from "zod";
-import { Text, Box } from "ink";
 import path from "node:path";
+import { Box, Text } from "ink";
+import { z } from "zod";
+
 import { CommandBody } from "../components/Async";
 
 const ROOT = path.join(import.meta.dir, "../..");

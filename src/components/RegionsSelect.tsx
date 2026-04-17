@@ -1,5 +1,6 @@
+import { Box, Text, useApp, useInput } from "ink";
 import { useState } from "react";
-import { Text, Box, useApp, useInput } from "ink";
+
 import { REGIONS, type Region } from "../lib/catalog";
 import { ALWAYS_UNLOCKED, setUnlockedRegions } from "../lib/settings";
 
@@ -49,8 +50,10 @@ export function RegionsSelect({ initial }: { initial: Region[] }) {
     const sorted = REGIONS.filter((r) => selected.has(r) || ALWAYS_UNLOCKED.includes(r));
     return (
       <Box flexDirection="column">
-        <Text><Text color="green">✓</Text> unlocked regions saved</Text>
-        <Text color="gray">  [{sorted.join(", ")}]</Text>
+        <Text>
+          <Text color="green">✓</Text> unlocked regions saved
+        </Text>
+        <Text color="gray"> [{sorted.join(", ")}]</Text>
       </Box>
     );
   }
@@ -60,7 +63,7 @@ export function RegionsSelect({ initial }: { initial: Region[] }) {
   return (
     <Box flexDirection="column">
       <Text bold>Toggle unlocked regions</Text>
-      <Text color="gray">  ↑/↓ move · space toggle · enter save · esc cancel</Text>
+      <Text color="gray"> ↑/↓ move · space toggle · enter save · esc cancel</Text>
       <Box marginTop={1} flexDirection="column">
         {REGIONS.map((r, i) => {
           const isLocked = ALWAYS_UNLOCKED.includes(r);
@@ -71,9 +74,10 @@ export function RegionsSelect({ initial }: { initial: Region[] }) {
           return (
             <Text key={r}>
               <Text color={isCursor ? "cyan" : undefined}>{isCursor ? "› " : "  "}</Text>
-              <Text color={markColor}>{mark}</Text>
-              {" "}
-              <Text color={isCursor ? "cyan" : undefined} bold={isCursor}>{r}</Text>
+              <Text color={markColor}>{mark}</Text>{" "}
+              <Text color={isCursor ? "cyan" : undefined} bold={isCursor}>
+                {r}
+              </Text>
               {isLocked ? <Text color="gray"> (always unlocked)</Text> : null}
             </Text>
           );

@@ -1,21 +1,51 @@
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
+
 import {
-  filterMissing,
-  pickEasiest,
-  uniqueTasks,
-  tierBreakdown,
   areaBreakdown,
+  filterMissing,
   levelGaps,
   matchesFilter,
+  pickEasiest,
+  tierBreakdown,
+  uniqueTasks,
 } from "../src/lib/queries";
-import { task, progress } from "./fixtures";
+import { progress, task } from "./fixtures";
 
 const catalog = [
   task({ id: 1, name: "Catch a Herring", tier: "easy", points: 10, completionPct: 60 }),
-  task({ id: 2, name: "Fletch 50 Willow longbow (u)", tier: "medium", points: 30, completionPct: 58.7, requirements: { skills: [{ skill: "Fletching", level: 40 }], other: null } }),
-  task({ id: 3, name: "Fletch 50 Yew longbow (u)", tier: "hard", points: 80, completionPct: 14.9, requirements: { skills: [{ skill: "Fletching", level: 70 }], other: null } }),
-  task({ id: 4, name: "Mine 50 Iron Ore", tier: "medium", points: 30, area: "tirannwn", completionPct: 74.8, requirements: { skills: [{ skill: "Mining", level: 15 }], other: null } }),
-  task({ id: 5, name: "Moon Chest", tier: "elite", points: 200, isPactTask: true, completionPct: null }),
+  task({
+    id: 2,
+    name: "Fletch 50 Willow longbow (u)",
+    tier: "medium",
+    points: 30,
+    completionPct: 58.7,
+    requirements: { skills: [{ skill: "Fletching", level: 40 }], other: null },
+  }),
+  task({
+    id: 3,
+    name: "Fletch 50 Yew longbow (u)",
+    tier: "hard",
+    points: 80,
+    completionPct: 14.9,
+    requirements: { skills: [{ skill: "Fletching", level: 70 }], other: null },
+  }),
+  task({
+    id: 4,
+    name: "Mine 50 Iron Ore",
+    tier: "medium",
+    points: 30,
+    area: "tirannwn",
+    completionPct: 74.8,
+    requirements: { skills: [{ skill: "Mining", level: 15 }], other: null },
+  }),
+  task({
+    id: 5,
+    name: "Moon Chest",
+    tier: "elite",
+    points: 200,
+    isPactTask: true,
+    completionPct: null,
+  }),
 ];
 
 describe("matchesFilter", () => {

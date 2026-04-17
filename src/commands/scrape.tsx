@@ -1,8 +1,9 @@
+import { Box, Text } from "ink";
 import { z } from "zod";
-import { Text, Box } from "ink";
-import { scrapeAndWrite } from "../scrape";
+
 import { CommandBody } from "../components/Async";
 import { jsonOption } from "../lib/cli-options";
+import { scrapeAndWrite } from "../scrape";
 
 export const description = "Re-scrape the wiki tasks page into data/tasks.json";
 
@@ -34,9 +35,9 @@ export default function Scrape({ options }: Props) {
           <Text>
             <Text color="green">✓</Text> scraped <Text bold>{data.taskCount}</Text> tasks
           </Text>
-          <Text color="gray">  league: {data.league}</Text>
-          <Text color="gray">  at:     {data.scrapedAt}</Text>
-          <Text color="gray">  from:   {data.source}</Text>
+          <Text color="gray"> league: {data.league}</Text>
+          <Text color="gray"> at: {data.scrapedAt}</Text>
+          <Text color="gray"> from: {data.source}</Text>
         </Box>
       )}
     </CommandBody>

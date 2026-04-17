@@ -1,11 +1,12 @@
-import { z } from "zod";
 import { option } from "pastel";
-import { otherPlayers, resolvePlayer } from "../lib/settings";
-import { getPlayerProgress, uniqueTasks } from "../lib/queries";
-import type { Task } from "../lib/catalog";
+import { z } from "zod";
+
 import { CommandBody } from "../components/Async";
 import { TaskList } from "../components/TaskList";
+import type { Task } from "../lib/catalog";
 import { jsonOption, playerOption } from "../lib/cli-options";
+import { getPlayerProgress, uniqueTasks } from "../lib/queries";
+import { otherPlayers, resolvePlayer } from "../lib/settings";
 
 export const description = "Tasks the player has that others don't";
 
@@ -14,7 +15,12 @@ export const options = z.object({
   vs: z
     .array(z.string())
     .optional()
-    .describe(option({ description: "Players to compare against (repeatable; defaults to all other configured players)" })),
+    .describe(
+      option({
+        description:
+          "Players to compare against (repeatable; defaults to all other configured players)",
+      })
+    ),
   json: jsonOption,
 });
 
@@ -39,10 +45,7 @@ export default function UniqueCmd({ options }: Props) {
       json={options.json}
     >
       {(data) => (
-        <TaskList
-          label={`${data.player} unique vs [${data.vs.join(", ")}]`}
-          tasks={data.tasks}
-        />
+        <TaskList label={`${data.player} unique vs [${data.vs.join(", ")}]`} tasks={data.tasks} />
       )}
     </CommandBody>
   );

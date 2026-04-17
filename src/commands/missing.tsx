@@ -1,10 +1,17 @@
 import { z } from "zod";
-import { resolvePlayer } from "../lib/settings";
-import { getPlayerProgress, missingTasks } from "../lib/queries";
-import type { Task } from "../lib/catalog";
+
 import { CommandBody } from "../components/Async";
 import { TaskList } from "../components/TaskList";
-import { buildFilter, filterOptions, jsonOption, limitOption, playerOption } from "../lib/cli-options";
+import type { Task } from "../lib/catalog";
+import {
+  buildFilter,
+  filterOptions,
+  jsonOption,
+  limitOption,
+  playerOption,
+} from "../lib/cli-options";
+import { getPlayerProgress, missingTasks } from "../lib/queries";
+import { resolvePlayer } from "../lib/settings";
 
 export const description = "Tasks the player has not completed";
 

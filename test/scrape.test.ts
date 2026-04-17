@@ -1,10 +1,9 @@
-import { describe, test, expect } from "bun:test";
-import { parseTasksHtml } from "../src/scrape";
+import { describe, expect, test } from "bun:test";
 import path from "node:path";
 
-const fixture = await Bun.file(
-  path.join(import.meta.dir, "fixtures/tasks.html")
-).text();
+import { parseTasksHtml } from "../src/scrape";
+
+const fixture = await Bun.file(path.join(import.meta.dir, "fixtures/tasks.html")).text();
 const tasks = parseTasksHtml(fixture);
 
 describe("parseTasksHtml", () => {

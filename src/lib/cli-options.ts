@@ -1,5 +1,6 @@
-import { z } from "zod";
 import { option } from "pastel";
+import { z } from "zod";
+
 import { TIERS } from "./catalog";
 import type { TaskFilter } from "./queries";
 import { effectiveUnlockedRegions, loadSettings } from "./settings";
@@ -12,7 +13,9 @@ export const jsonOption = z
 export const playerOption = z
   .string()
   .optional()
-  .describe(option({ description: "Player RSN (defaults to configured defaultPlayer)", alias: "p" }));
+  .describe(
+    option({ description: "Player RSN (defaults to configured defaultPlayer)", alias: "p" })
+  );
 
 export const limitOption = z
   .number()
@@ -20,15 +23,44 @@ export const limitOption = z
   .describe(option({ description: "Cap result count" }));
 
 export const filterOptions = {
-  skill: z.string().optional().describe(option({ description: "Only tasks requiring this skill" })),
-  tier: z.enum(TIERS).optional().describe(option({ description: "Filter by tier" })),
-  area: z.string().optional().describe(option({ description: "Filter by area (e.g. general, tirannwn, varlamore)" })),
-  maxPoints: z.number().optional().describe(option({ description: "Only tasks worth <= N points" })),
-  minPoints: z.number().optional().describe(option({ description: "Only tasks worth >= N points" })),
-  minCompletion: z.number().optional().describe(option({ description: "Only tasks with >= N% wiki completion" })),
-  maxCompletion: z.number().optional().describe(option({ description: "Only tasks with <= N% wiki completion" })),
-  pactOnly: z.boolean().default(false).describe(option({ description: "Only pact-specific tasks" })),
-  allRegions: z.boolean().default(false).describe(option({ description: "Ignore unlockedRegions filter and show tasks from all regions" })),
+  skill: z
+    .string()
+    .optional()
+    .describe(option({ description: "Only tasks requiring this skill" })),
+  tier: z
+    .enum(TIERS)
+    .optional()
+    .describe(option({ description: "Filter by tier" })),
+  area: z
+    .string()
+    .optional()
+    .describe(option({ description: "Filter by area (e.g. general, tirannwn, varlamore)" })),
+  maxPoints: z
+    .number()
+    .optional()
+    .describe(option({ description: "Only tasks worth <= N points" })),
+  minPoints: z
+    .number()
+    .optional()
+    .describe(option({ description: "Only tasks worth >= N points" })),
+  minCompletion: z
+    .number()
+    .optional()
+    .describe(option({ description: "Only tasks with >= N% wiki completion" })),
+  maxCompletion: z
+    .number()
+    .optional()
+    .describe(option({ description: "Only tasks with <= N% wiki completion" })),
+  pactOnly: z
+    .boolean()
+    .default(false)
+    .describe(option({ description: "Only pact-specific tasks" })),
+  allRegions: z
+    .boolean()
+    .default(false)
+    .describe(
+      option({ description: "Ignore unlockedRegions filter and show tasks from all regions" })
+    ),
 };
 
 type FilterInput = {

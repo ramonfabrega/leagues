@@ -7,9 +7,14 @@
   "scripts": {
     "start": "bun src/cli.tsx",
     "typecheck": "bun tsc --noEmit",
+    "format": "biome format --write",
+    "lint": "biome lint",
+    "check": "biome check --write",
+    "ci": "biome ci",
     "postinstall": "bun link"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.12",
     "@types/jsdom": "^21.1.7",
     "@types/react": "^19.2.14",
     "bun-types": "latest"
