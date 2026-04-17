@@ -1,5 +1,6 @@
 import { fetchPlayer, type PlayerData } from "./api";
 import { loadCatalog, taskById, type Task, type Tier } from "./catalog";
+import { loadSettings } from "./settings";
 
 export type PlayerProgress = {
   username: string;
@@ -24,7 +25,8 @@ export type TaskFilter = {
 // ─── I/O wrappers ──────────────────────────────────────────────────
 
 export async function getPlayerProgress(rsn: string): Promise<PlayerProgress> {
-  const raw = await fetchPlayer(rsn);
+  const settings = await loadSettings();
+  const raw = await fetchPlayer(rsn, settings.league);
   return await buildProgress(raw);
 }
 

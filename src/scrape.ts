@@ -1,5 +1,5 @@
 import { JSDOM } from "jsdom";
-import { LEAGUE, WIKI_TASKS_URL } from "../leagues.config";
+import { loadSettings } from "./lib/settings";
 import { fetchWikiTasksHtml } from "./lib/api";
 import {
   writeCatalog,
@@ -23,14 +23,13 @@ export function parseTasksHtml(html: string): Task[] {
   return tasks;
 }
 
-export async function scrape(
-  url: string = WIKI_TASKS_URL
-): Promise<Catalog> {
-  const html = await fetchWikiTasksHtml(url);
+export async function scrape(): Promise<Catalog> {
+  const settings = await loadSettings();
+  const html = await fetchWikiTasksHtml(settings.wikiTasksUrl);
   return {
-    league: LEAGUE,
+    league: settings.league,
     scrapedAt: new Date().toISOString(),
-    source: url,
+    source: settings.wikiTasksUrl,
     tasks: parseTasksHtml(html),
   };
 }

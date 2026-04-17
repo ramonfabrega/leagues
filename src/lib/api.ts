@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { LEAGUE, WIKI_TASKS_URL } from "../../leagues.config";
 
 const USER_AGENT = "leagues-cli/1.0";
 
@@ -13,8 +12,8 @@ export const PlayerDataSchema = z.object({
 
 export type PlayerData = z.infer<typeof PlayerDataSchema>;
 
-export async function fetchPlayer(rsn: string): Promise<PlayerData> {
-  const url = `https://sync.runescape.wiki/runelite/player/${encodeURIComponent(rsn)}/${LEAGUE}`;
+export async function fetchPlayer(rsn: string, league: string): Promise<PlayerData> {
+  const url = `https://sync.runescape.wiki/runelite/player/${encodeURIComponent(rsn)}/${league}`;
   const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
   if (!res.ok) {
     throw new Error(`fetchPlayer(${rsn}) → ${res.status} ${res.statusText}`);
@@ -29,9 +28,7 @@ export async function fetchPlayer(rsn: string): Promise<PlayerData> {
   return parsed.data;
 }
 
-export async function fetchWikiTasksHtml(
-  url: string = WIKI_TASKS_URL
-): Promise<string> {
+export async function fetchWikiTasksHtml(url: string): Promise<string> {
   const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
   if (!res.ok) throw new Error(`GET ${url} → ${res.status} ${res.statusText}`);
   return await res.text();

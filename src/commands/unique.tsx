@@ -1,7 +1,7 @@
 import React from "react";
 import { z } from "zod";
 import { option } from "pastel";
-import { resolvePlayer, otherPlayers } from "../../leagues.config";
+import { loadSettings, resolvePlayer, otherPlayers } from "../lib/settings";
 import { getPlayerProgress, uniqueTasks } from "../lib/queries";
 import type { Task } from "../lib/catalog";
 import { CommandBody } from "../components/Async";
@@ -24,13 +24,14 @@ type Props = { options: z.infer<typeof options> };
 type Payload = { player: string; vs: string[]; count: number; tasks: Task[] };
 
 export default function UniqueCmd({ options }: Props) {
-  const targetName = resolvePlayer(options.player);
-  const vsNames = options.vs?.length
-    ? options.vs.map((s) => resolvePlayer(s.trim()))
-    : otherPlayers(targetName);
   return (
     <CommandBody<Payload>
       run={async () => {
+        const settings = await loadSettings();
+        const targetName = resolvePlayer(settings, options.player);
+        const vsNames = options.vs?.length
+          ? options.vs.map((s) => resolvePlayer(settings, s.trim()))
+          : otherPlayers(settings, targetName);
         const [target, ...others] = await Promise.all(
           [targetName, ...vsNames].map((n) => getPlayerProgress(n))
         );
@@ -38,7 +39,6 @@ export default function UniqueCmd({ options }: Props) {
         return { player: target!.username, vs: vsNames, count: tasks.length, tasks };
       }}
       json={options.json}
-      loadingLabel={`Fetching ${[targetName, ...vsNames].join(", ")}`}
     >
       {(data) => (
         <TaskList

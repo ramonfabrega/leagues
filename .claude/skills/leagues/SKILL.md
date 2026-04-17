@@ -7,7 +7,7 @@ description: Query Old School RuneScape League (Demonic Pacts) progress — task
 
 Tracks OSRS league progress for the user and configured friends. Backed by a scraped catalog of every league task (`data/tasks.json`) and the RuneScape Wiki's live player-sync endpoint.
 
-**Configured players:** see `leagues.config.ts`. Default player is the first entry / `defaultPlayer`. When the user says "me" or doesn't name a player, use the default.
+**Configured players:** project defaults live in `leagues.config.json`; per-user overrides in `leagues.local.json` (gitignored, managed via `leagues config`). When the user says "me" or doesn't name a player, use the effective `defaultPlayer` (check with `leagues config --json`).
 
 ## Use the `leagues` command
 
@@ -23,7 +23,20 @@ leagues levels [--players A --players B]        # skill level gaps
 leagues task "<exact name>"                     # show a single task (or fuzzy suggestions)
 leagues search "<substring>"                    # task name + description search
 leagues scrape                                  # refresh data/tasks.json from the wiki
+leagues config [subcommand]                     # view/edit per-user defaults (see below)
 ```
+
+### Config subcommands (edit leagues.local.json)
+
+```
+leagues config                          # show effective merged config
+leagues config default <player>         # set per-user default player
+leagues config add-player <player>      # add to per-user extraPlayers
+leagues config remove-player <player>   # remove from extraPlayers
+leagues config reset                    # delete leagues.local.json
+```
+
+Use `leagues config --json` to read the effective config programmatically (useful for figuring out who "me" is).
 
 ### Filter flags (for `missing` and `easiest`)
 

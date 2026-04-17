@@ -1,6 +1,6 @@
 import React from "react";
 import { z } from "zod";
-import { resolvePlayer } from "../../leagues.config";
+import { loadSettings, resolvePlayer } from "../lib/settings";
 import {
   getPlayerProgress,
   tierBreakdown,
@@ -21,10 +21,11 @@ export const options = z.object({
 type Props = { options: z.infer<typeof options> };
 
 export default function Summary({ options }: Props) {
-  const rsn = resolvePlayer(options.player);
   return (
     <CommandBody<SummaryPayload>
       run={async () => {
+        const settings = await loadSettings();
+        const rsn = resolvePlayer(settings, options.player);
         const [player, catalog] = await Promise.all([getPlayerProgress(rsn), loadCatalog()]);
         return {
           username: player.username,
@@ -39,7 +40,7 @@ export default function Summary({ options }: Props) {
         };
       }}
       json={options.json}
-      loadingLabel={`Fetching ${rsn}`}
+      loadingLabel={`Fetching ${options.player ?? "default player"}`}
     >
       {(data) => <SummaryView {...data} />}
     </CommandBody>

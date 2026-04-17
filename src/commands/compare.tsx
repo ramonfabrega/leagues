@@ -1,9 +1,10 @@
 import React from "react";
 import { z } from "zod";
 import { option, argument } from "pastel";
-import { PLAYERS, resolvePlayer } from "../../leagues.config";
+import { loadSettings, resolvePlayer } from "../lib/settings";
 import { CompareOnce, CompareWatch } from "../components/Compare";
 import { jsonOption } from "../lib/cli-options";
+import { CommandBody } from "../components/Async";
 
 export const description = "Diff unique tasks between two or more players";
 
@@ -33,12 +34,26 @@ type Props = {
 };
 
 export default function Compare({ args, options }: Props) {
-  const players = args.length >= 2 ? args.map(resolvePlayer) : [...PLAYERS];
-  if (players.length < 2) {
-    throw new Error("compare needs at least 2 players (pass them as args or configure them in leagues.config.ts)");
-  }
-  if (options.watch) {
-    return <CompareWatch players={players} intervalMs={options.interval * 1000} />;
-  }
-  return <CompareOnce players={players} json={options.json} />;
+  return (
+    <CommandBody<{ players: string[] }>
+      run={async () => {
+        const settings = await loadSettings();
+        const players = args.length >= 2
+          ? args.map((a) => resolvePlayer(settings, a))
+          : [...settings.players];
+        if (players.length < 2) {
+          throw new Error("compare needs at least 2 players (pass them as args or configure them via leagues config)");
+        }
+        return { players };
+      }}
+    >
+      {(data) =>
+        options.watch ? (
+          <CompareWatch players={data.players} intervalMs={options.interval * 1000} />
+        ) : (
+          <CompareOnce players={data.players} json={options.json} />
+        )
+      }
+    </CommandBody>
+  );
 }

@@ -1,7 +1,7 @@
 import React from "react";
 import { z } from "zod";
 import { option } from "pastel";
-import { PLAYERS, resolvePlayer } from "../../leagues.config";
+import { loadSettings, resolvePlayer } from "../lib/settings";
 import { getPlayerProgress, levelGaps, type LevelDiff } from "../lib/queries";
 import { CommandBody } from "../components/Async";
 import { LevelGapsView } from "../components/LevelGaps";
@@ -22,15 +22,17 @@ type Props = { options: z.infer<typeof options> };
 type Payload = { players: string[]; diffs: LevelDiff[] };
 
 export default function Levels({ options }: Props) {
-  const rsns = options.players?.length ? options.players.map(resolvePlayer) : [...PLAYERS];
   return (
     <CommandBody<Payload>
       run={async () => {
+        const settings = await loadSettings();
+        const rsns = options.players?.length
+          ? options.players.map((p) => resolvePlayer(settings, p))
+          : [...settings.players];
         const progresses = await Promise.all(rsns.map((r) => getPlayerProgress(r)));
         return { players: rsns, diffs: levelGaps(progresses) };
       }}
       json={options.json}
-      loadingLabel={`Fetching ${rsns.join(", ")}`}
     >
       {(data) => <LevelGapsView players={data.players} diffs={data.diffs} />}
     </CommandBody>
