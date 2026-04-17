@@ -8,6 +8,7 @@ import { Async } from "./Async";
 import { TaskList } from "./TaskList";
 
 type Snapshot = {
+  completed: Record<string, Task[]>;
   unique: Record<string, Task[]>;
   totalPoints: Record<string, number>;
   at: string;
@@ -26,16 +27,18 @@ function resolvePlayers(args: string[]): string[] {
 
 async function buildSnapshot(players: string[]): Promise<Snapshot> {
   const progresses = await Promise.all(players.map((r) => getPlayerProgress(r)));
+  const completed: Record<string, Task[]> = {};
   const unique: Record<string, Task[]> = {};
   const totalPoints: Record<string, number> = {};
   for (let i = 0; i < players.length; i++) {
     const name = players[i];
     const target = progresses[i];
     const others = progresses.filter((_, j) => j !== i);
+    completed[name] = target.completed;
     unique[name] = uniqueTasks(target, others);
     totalPoints[name] = target.totalPoints;
   }
-  return { unique, totalPoints, at: new Date().toISOString() };
+  return { completed, unique, totalPoints, at: new Date().toISOString() };
 }
 
 function diffIds(prev: Task[], next: Task[]): { added: Task[]; removed: Task[] } {
@@ -153,7 +156,7 @@ function LogEntryView({ entry, nameW }: { entry: LogEntry; nameW: number }) {
         rows.push({ sign: "-", player: c.player, points: t.points, task: t.name, key: `r${t.id}` });
     }
     return (
-      <Box flexDirection="column">
+      <Box flexDirection="column" marginTop={1}>
         {rows.map((r) => (
           <Text key={r.key}>
             <Text color="gray">{timeOf(entry.at)}</Text>
@@ -207,7 +210,7 @@ export function CompareWatch({ args, intervalMs }: { args: string[]; intervalMs:
         } else {
           const changes: Change[] = [];
           for (const p of ps) {
-            const d = diffIds(prev.unique[p] ?? [], next.unique[p] ?? []);
+            const d = diffIds(prev.completed[p] ?? [], next.completed[p] ?? []);
             if (d.added.length || d.removed.length) changes.push({ player: p, ...d });
           }
           if (changes.length > 0) append({ kind: "change", at: next.at, changes });
