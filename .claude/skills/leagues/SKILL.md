@@ -46,6 +46,8 @@ Use `leagues config --json` to read the effective config programmatically (usefu
 - `--max-points N` / `--min-points N`
 - `--min-completion N` / `--max-completion N` (percent; e.g. `--min-completion 50`)
 - `--pact-only` — only league-specific "pact" tasks
+- `--within-levels` — only tasks where the player meets every skill requirement
+- `--all-regions` — ignore the configured unlockedRegions filter
 - `--limit N` — cap rows (easiest defaults to 20)
 - `--json` — machine-readable output
 
@@ -55,7 +57,7 @@ Use `leagues config --json` to read the effective config programmatically (usefu
 |---|---|
 | "what fletching tasks am I missing?" | `leagues missing --skill Fletching --json` |
 | "easiest fletching tasks I haven't done" | `leagues easiest --skill Fletching --json` |
-| "what's the easiest task I can do right now?" | `leagues easiest --limit 10 --json` |
+| "what's the easiest task I can do right now?" | `leagues easiest --within-levels --limit 10 --json` |
 | "how many points do I have?" | `leagues summary --json` |
 | "what tasks do I have that greenbay doesn't?" | `leagues unique --player "R amon" --vs greenbay420 --json` |
 | "compare me and greenbay" | `leagues compare "R amon" "greenbay420"` |
@@ -66,9 +68,33 @@ Use `leagues config --json` to read the effective config programmatically (usefu
 
 ## Filtering semantics
 
-- `--skill X` filters to tasks whose **explicit wiki requirement** lists skill X. It does NOT use semantic matching — "Catch a Herring" is a Fishing task but has no explicit Fishing level requirement, so it won't appear under `--skill Fishing`. For semantic/thematic questions ("what Fishing-themed tasks…"), use `leagues search fish --json` and filter yourself from the results.
+- `--skill X` filters to tasks whose **explicit wiki requirement** lists skill X. It does NOT use semantic matching — "Catch a Herring" is a Fishing task with no explicit Fishing level requirement, so it won't appear under `--skill Fishing`.
+- `--within-levels` uses the player's current skill levels from the RuneLite sync endpoint; a task with reqs `[Fletching 40]` is kept only if the player has Fletching ≥ 40.
 - `completionPct` is the share of all league players who completed that task. Higher % means easier / more commonly done. `null` means the wiki didn't report a %.
 - Tier → points mapping: easy 10, medium 30, hard 80, elite 200, master 400.
+
+## Semantic / thematic queries (recipe)
+
+The CLI does **deterministic** filtering (explicit skill reqs, tiers, points, regions, levels). Thematic classification ("which tasks are Slayer-themed?", "Fishing tasks I can do?") is **your job** — the catalog is small (~1,600 tasks), `data/tasks.json` is local, and ad-hoc regex gives you honest, auditable results per question. Don't ask the user to productionize a `--theme` flag preemptively; the LLM-in-the-loop shape is the intended one.
+
+**Recipe — "tasks themed around X that I can do right now"**:
+
+1. Baseline via CLI (deterministic — region/level/completed filters applied):
+   ```bash
+   leagues summary --json                    # levels, completed count, points
+   leagues missing --within-levels --json    # missing ∩ region-allowed ∩ level-met
+   ```
+2. Add explicit-skill tasks (CLI does this cleanly):
+   ```bash
+   leagues missing --skill Slayer --within-levels --json
+   ```
+3. Add semantic matches via raw catalog read — tune the regex per question:
+   ```bash
+   jq '.tasks[] | select((.name + " " + .description) | test("slayer|black mask|slayer helm"; "i")) | {id, name, tier, completionPct, requirements}' data/tasks.json
+   ```
+4. Intersect the semantic set with the level-met missing IDs from step 1. Dedupe, rank by `completionPct` desc, answer.
+
+If the user asks the same thematic question repeatedly across sessions, flag it — a `--theme <skill>` flag may be worth adding to the catalog as an `inferredSkills` field at scrape time. Until then, keyword regex stays in the prompt, not the code.
 
 ## When to re-scrape
 

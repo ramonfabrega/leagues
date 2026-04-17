@@ -27,6 +27,12 @@ export const options = z.object({
     .boolean()
     .default(false)
     .describe(option({ description: "Ignore unlockedRegions filter" })),
+  withinLevels: z
+    .boolean()
+    .default(false)
+    .describe(
+      option({ description: "Only tasks whose skill requirements are all met by the player" })
+    ),
   json: jsonOption,
 });
 
@@ -41,16 +47,23 @@ export default function Search({ args, options }: Props) {
   return (
     <Async
       loader={async () => {
-        const player = options.completed
-          ? null
-          : await getPlayerProgress(resolvePlayer(options.player));
-        const filter = buildFilter({ allRegions: options.allRegions });
-        const matches = await searchCatalog(query, { player: player ?? undefined, filter });
+        const needsPlayer = !options.completed || options.withinLevels;
+        const player = needsPlayer ? await getPlayerProgress(resolvePlayer(options.player)) : null;
+        const filter = buildFilter(
+          { allRegions: options.allRegions, withinLevels: options.withinLevels },
+          player?.levels
+        );
+        const matches = await searchCatalog(query, {
+          player: options.completed ? undefined : (player ?? undefined),
+          filter,
+        });
         const tasks = matches.slice(0, options.limit);
-        const label = player
-          ? `Search "${query}" — missing for ${player.username}`
-          : `Search "${query}" — all tasks`;
-        return { label, tasks };
+        const qualifier = options.completed
+          ? player
+            ? ` — all tasks (${player.username} levels)`
+            : " — all tasks"
+          : ` — missing for ${player?.username ?? "default"}`;
+        return { label: `Search "${query}"${qualifier}`, tasks };
       }}
       render={TaskList}
       json={options.json}

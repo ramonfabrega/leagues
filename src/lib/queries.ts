@@ -20,6 +20,7 @@ export type TaskFilter = {
   minCompletionPct?: number;
   maxCompletionPct?: number;
   pactOnly?: boolean;
+  withinLevels?: Record<string, number>;
 };
 
 // ─── I/O wrappers ──────────────────────────────────────────────────
@@ -107,6 +108,11 @@ export function matchesFilter(task: Task, filter: TaskFilter): boolean {
     const s = filter.skill.toLowerCase();
     const hasSkillReq = task.requirements.skills.some((r) => r.skill.toLowerCase() === s);
     if (!hasSkillReq) return false;
+  }
+  if (filter.withinLevels) {
+    const levels = filter.withinLevels;
+    const allMet = task.requirements.skills.every((r) => (levels[r.skill] ?? 0) >= r.level);
+    if (!allMet) return false;
   }
   return true;
 }

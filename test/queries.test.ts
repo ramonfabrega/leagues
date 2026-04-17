@@ -88,6 +88,16 @@ describe("matchesFilter", () => {
   test("empty areas array is treated as no filter", () => {
     expect(matchesFilter(catalog[3], { areas: [] })).toBe(true);
   });
+
+  test("withinLevels keeps tasks whose skill reqs are all met", () => {
+    // catalog[1] needs Fletching 40; catalog[3] needs Mining 15
+    expect(matchesFilter(catalog[1], { withinLevels: { Fletching: 50 } })).toBe(true);
+    expect(matchesFilter(catalog[1], { withinLevels: { Fletching: 20 } })).toBe(false);
+    expect(matchesFilter(catalog[3], { withinLevels: { Mining: 15 } })).toBe(true);
+    expect(matchesFilter(catalog[3], { withinLevels: {} })).toBe(false);
+    // catalog[0] has no skill reqs — always passes
+    expect(matchesFilter(catalog[0], { withinLevels: {} })).toBe(true);
+  });
 });
 
 describe("filterMissing", () => {

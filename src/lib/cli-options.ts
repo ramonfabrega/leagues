@@ -61,6 +61,12 @@ export const filterOptions = {
     .describe(
       option({ description: "Ignore unlockedRegions filter and show tasks from all regions" })
     ),
+  withinLevels: z
+    .boolean()
+    .default(false)
+    .describe(
+      option({ description: "Only tasks whose skill requirements are all met by the player" })
+    ),
 };
 
 type FilterInput = {
@@ -73,9 +79,10 @@ type FilterInput = {
   maxCompletion?: number;
   pactOnly?: boolean;
   allRegions?: boolean;
+  withinLevels?: boolean;
 };
 
-export function buildFilter(o: FilterInput): TaskFilter {
+export function buildFilter(o: FilterInput, levels?: Record<string, number>): TaskFilter {
   const base: TaskFilter = {
     skill: o.skill,
     tier: o.tier,
@@ -85,6 +92,7 @@ export function buildFilter(o: FilterInput): TaskFilter {
     minCompletionPct: o.minCompletion,
     maxCompletionPct: o.maxCompletion,
     pactOnly: o.pactOnly,
+    withinLevels: o.withinLevels && levels ? levels : undefined,
   };
   if (o.allRegions || o.area) return base;
   const { unlockedRegions } = loadSettings();
