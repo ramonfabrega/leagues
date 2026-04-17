@@ -6,7 +6,7 @@ import type { Task } from "../lib/catalog";
 import { TaskList } from "./TaskList";
 import { CommandBody } from "./Async";
 
-export type Snapshot = {
+type Snapshot = {
   unique: Record<string, Task[]>;
   totalPoints: Record<string, number>;
   at: string;
@@ -23,7 +23,7 @@ async function resolvePlayers(args: string[]): Promise<string[]> {
   return players;
 }
 
-export async function buildSnapshot(players: string[]): Promise<Snapshot> {
+async function buildSnapshot(players: string[]): Promise<Snapshot> {
   const progresses = await Promise.all(players.map((r) => getPlayerProgress(r)));
   const byName = new Map<string, PlayerProgress>(progresses.map((p, i) => [players[i]!, p]));
   const unique: Record<string, Task[]> = {};

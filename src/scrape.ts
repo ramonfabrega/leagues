@@ -23,7 +23,7 @@ export function parseTasksHtml(html: string): Task[] {
   return tasks;
 }
 
-export async function scrape(): Promise<Catalog> {
+async function scrape(): Promise<Catalog> {
   const settings = await loadSettings();
   const html = await fetchWikiTasksHtml(settings.wikiTasksUrl);
   return {

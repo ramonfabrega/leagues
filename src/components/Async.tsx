@@ -1,7 +1,7 @@
 import { Component, Suspense, use, useEffect, useState, type ReactNode } from "react";
 import { Text, useApp } from "ink";
 
-export function Loading({ label = "Working" }: { label?: string }) {
+function Loading({ label = "Working" }: { label?: string }) {
   return <Text color="gray">{label}…</Text>;
 }
 

@@ -3,7 +3,7 @@ import { unlink } from "node:fs/promises";
 import { z } from "zod";
 
 const ROOT = path.join(import.meta.dir, "../..");
-export const PROJECT_CONFIG_PATH = path.join(ROOT, "leagues.config.json");
+const PROJECT_CONFIG_PATH = path.join(ROOT, "leagues.config.json");
 export const LOCAL_CONFIG_PATH = path.join(ROOT, "leagues.local.json");
 
 export const ProjectConfigSchema = z.object({
