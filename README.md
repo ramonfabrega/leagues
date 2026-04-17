@@ -24,6 +24,7 @@ After cloning, your friend typically runs:
 ```bash
 leagues config default "their RSN"       # sets their default player
 leagues config add-player "someoneElse"  # optional: add someone not in the committed list
+leagues config regions                   # interactive toggle for unlocked regions (writes config.json)
 leagues config                           # show effective merged config
 leagues config reset                     # wipe leagues.local.json
 ```
@@ -37,11 +38,14 @@ leagues                                             # prints help
 leagues compare "R amon" "greenbay420"              # diff unique tasks (one-shot)
 leagues compare "R amon" "greenbay420" --watch      # permarunning, 10s polling
 leagues summary                                      # default player progress
-leagues missing --skill Fletching                    # missing tasks requiring Fletching
+leagues missing --skill Fletching                    # missing tasks (respects unlockedRegions)
+leagues missing --all-regions                        # ignore unlockedRegions filter
 leagues easiest --skill Fletching --limit 10         # sorted by highest wiki %
 leagues levels                                       # level gaps across players
 leagues task "Fletch 50 Willow longbow (u)"          # task details
-leagues search fletch                                # free-text search
+leagues search fletch                                # free-text search (excludes completed)
+leagues search fletch --all                          # include completed + all regions
+leagues config regions                               # interactive multi-select unlock editor
 leagues scrape                                       # refresh data/tasks.json
 leagues update [--scrape]                            # git pull + bun install (+ scrape)
 leagues uninstall                                    # bun unlink (removes the global binary)

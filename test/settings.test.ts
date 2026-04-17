@@ -1,8 +1,10 @@
 import { describe, test, expect } from "bun:test";
 import {
+  effectiveUnlockedRegions,
   mergeSettings,
   ProjectConfigSchema,
   LocalConfigSchema,
+  ALWAYS_UNLOCKED,
   type ProjectConfig,
 } from "../src/lib/settings";
 
@@ -56,6 +58,35 @@ describe("ProjectConfigSchema", () => {
   test("rejects non-URL wikiTasksUrl", () => {
     const r = ProjectConfigSchema.safeParse({ ...project, wikiTasksUrl: "not a url" });
     expect(r.success).toBe(false);
+  });
+});
+
+describe("effectiveUnlockedRegions", () => {
+  test("always includes karamja even if missing", () => {
+    expect(effectiveUnlockedRegions([])).toEqual(ALWAYS_UNLOCKED);
+    expect(effectiveUnlockedRegions(["desert"])).toEqual(["desert", "karamja"]);
+  });
+
+  test("dedupes and returns in canonical REGIONS order", () => {
+    const out = effectiveUnlockedRegions(["wilderness", "karamja", "asgarnia"]);
+    expect(out).toEqual(["asgarnia", "karamja", "wilderness"]);
+  });
+});
+
+describe("ProjectConfigSchema unlockedRegions", () => {
+  test("accepts known regions", () => {
+    const r = ProjectConfigSchema.safeParse({ ...project, unlockedRegions: ["karamja", "desert"] });
+    expect(r.success).toBe(true);
+  });
+
+  test("rejects unknown region", () => {
+    const r = ProjectConfigSchema.safeParse({ ...project, unlockedRegions: ["atlantis"] });
+    expect(r.success).toBe(false);
+  });
+
+  test("omitted is fine", () => {
+    const r = ProjectConfigSchema.safeParse(project);
+    expect(r.success).toBe(true);
   });
 });
 

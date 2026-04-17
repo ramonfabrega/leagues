@@ -16,6 +16,12 @@ export function ConfigView({ settings }: { settings: Settings }) {
         {overrides.defaultPlayer ? <Text color="gray"> (from local override)</Text> : null}
       </Text>
       <Text><Text color="gray">  players:        </Text>[{settings.players.join(", ")}]</Text>
+      <Text>
+        <Text color="gray">  unlockedRegions:</Text>
+        {settings.unlockedRegions.length > 0
+          ? ` [${settings.unlockedRegions.join(", ")}]`
+          : <Text color="gray"> (none — run "leagues config regions")</Text>}
+      </Text>
 
       <Box marginTop={1} flexDirection="column">
         <Text bold>Sources</Text>

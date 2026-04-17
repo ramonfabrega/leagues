@@ -2,6 +2,7 @@ import { z } from "zod";
 import { option } from "pastel";
 import { TIERS } from "./catalog";
 import type { TaskFilter } from "./queries";
+import { effectiveUnlockedRegions, loadSettings } from "./settings";
 
 export const jsonOption = z
   .boolean()
@@ -27,6 +28,7 @@ export const filterOptions = {
   minCompletion: z.number().optional().describe(option({ description: "Only tasks with >= N% wiki completion" })),
   maxCompletion: z.number().optional().describe(option({ description: "Only tasks with <= N% wiki completion" })),
   pactOnly: z.boolean().default(false).describe(option({ description: "Only pact-specific tasks" })),
+  allRegions: z.boolean().default(false).describe(option({ description: "Ignore unlockedRegions filter and show tasks from all regions" })),
 };
 
 type FilterInput = {
@@ -38,10 +40,11 @@ type FilterInput = {
   minCompletion?: number;
   maxCompletion?: number;
   pactOnly?: boolean;
+  allRegions?: boolean;
 };
 
-export function buildFilter(o: FilterInput): TaskFilter {
-  return {
+export async function buildFilter(o: FilterInput): Promise<TaskFilter> {
+  const base: TaskFilter = {
     skill: o.skill,
     tier: o.tier,
     area: o.area,
@@ -51,4 +54,8 @@ export function buildFilter(o: FilterInput): TaskFilter {
     maxCompletionPct: o.maxCompletion,
     pactOnly: o.pactOnly,
   };
+  if (o.allRegions || o.area) return base;
+  const { unlockedRegions } = await loadSettings();
+  if (unlockedRegions.length === 0) return base;
+  return { ...base, areas: [...effectiveUnlockedRegions(unlockedRegions), "general"] };
 }

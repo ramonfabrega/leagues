@@ -23,7 +23,7 @@ export default function Missing({ options }: Props) {
     <CommandBody<Payload>
       run={async () => {
         const player = await getPlayerProgress(await resolvePlayer(options.player));
-        const all = await missingTasks(player, buildFilter(options));
+        const all = await missingTasks(player, await buildFilter(options));
         const tasks = options.limit ? all.slice(0, options.limit) : all;
         return { player: player.username, count: tasks.length, tasks };
       }}

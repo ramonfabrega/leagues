@@ -1,9 +1,11 @@
 import { z } from "zod";
 import { option, argument } from "pastel";
-import { findTasks, type Task } from "../lib/catalog";
+import { type Task } from "../lib/catalog";
+import { resolvePlayer } from "../lib/settings";
+import { getPlayerProgress, searchCatalog } from "../lib/queries";
 import { CommandBody } from "../components/Async";
 import { TaskList } from "../components/TaskList";
-import { jsonOption } from "../lib/cli-options";
+import { buildFilter, jsonOption, playerOption } from "../lib/cli-options";
 
 export const description = "Full-text search over task name + description";
 
@@ -13,6 +15,9 @@ export const args = z.array(
 
 export const options = z.object({
   limit: z.number().default(50).describe(option({ description: "Cap result count" })),
+  player: playerOption,
+  all: z.boolean().default(false).describe(option({ description: "Include completed tasks and ignore unlockedRegions filter", alias: "a" })),
+  allRegions: z.boolean().default(false).describe(option({ description: "Ignore unlockedRegions filter" })),
   json: jsonOption,
 });
 
@@ -21,7 +26,7 @@ type Props = {
   options: z.infer<typeof options>;
 };
 
-type Payload = { query: string; count: number; tasks: Task[] };
+type Payload = { query: string; player: string | null; count: number; tasks: Task[] };
 
 export default function Search({ args, options }: Props) {
   const query = args.join(" ").trim();
@@ -29,13 +34,26 @@ export default function Search({ args, options }: Props) {
   return (
     <CommandBody<Payload>
       run={async () => {
-        const matches = await findTasks(query);
+        const player = options.all
+          ? null
+          : await getPlayerProgress(await resolvePlayer(options.player));
+        const filter = await buildFilter({ allRegions: options.all || options.allRegions });
+        const matches = await searchCatalog(query, { player: player ?? undefined, filter });
         const tasks = matches.slice(0, options.limit);
-        return { query, count: tasks.length, tasks };
+        return { query, player: player?.username ?? null, count: tasks.length, tasks };
       }}
       json={options.json}
     >
-      {(data) => <TaskList label={`Search "${data.query}"`} tasks={data.tasks} />}
+      {(data) => (
+        <TaskList
+          label={
+            data.player
+              ? `Search "${data.query}" — missing for ${data.player}`
+              : `Search "${data.query}" — all tasks`
+          }
+          tasks={data.tasks}
+        />
+      )}
     </CommandBody>
   );
 }

@@ -1,5 +1,5 @@
 import { fetchPlayer, type PlayerData } from "./api";
-import { loadCatalog, taskById, TIERS, type Task, type Tier } from "./catalog";
+import { findTasks, loadCatalog, taskById, TIERS, type Task, type Tier } from "./catalog";
 
 export type PlayerProgress = {
   username: string;
@@ -14,6 +14,7 @@ export type TaskFilter = {
   skill?: string;
   tier?: Tier;
   area?: string;
+  areas?: string[];
   maxPoints?: number;
   minPoints?: number;
   minCompletionPct?: number;
@@ -71,11 +72,26 @@ export async function easiestMissing(
   return pickEasiest(tasks, player, filter, limit);
 }
 
+export async function searchCatalog(
+  query: string,
+  opts: { player?: PlayerProgress; filter?: TaskFilter } = {}
+): Promise<Task[]> {
+  const matches = await findTasks(query);
+  return matches.filter((t) => {
+    if (opts.player?.completedTaskIds.has(t.id)) return false;
+    return matchesFilter(t, opts.filter ?? {});
+  });
+}
+
 // ─── Pure query fns (testable) ─────────────────────────────────────
 
 export function matchesFilter(task: Task, filter: TaskFilter): boolean {
   if (filter.tier && task.tier !== filter.tier) return false;
   if (filter.area && task.area.toLowerCase() !== filter.area.toLowerCase()) return false;
+  if (filter.areas && filter.areas.length > 0) {
+    const set = new Set(filter.areas.map((a) => a.toLowerCase()));
+    if (!set.has(task.area.toLowerCase())) return false;
+  }
   if (filter.maxPoints !== undefined && task.points > filter.maxPoints) return false;
   if (filter.minPoints !== undefined && task.points < filter.minPoints) return false;
   if (filter.pactOnly && !task.isPactTask) return false;

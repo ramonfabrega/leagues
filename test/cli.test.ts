@@ -32,12 +32,23 @@ describe("cli integration", () => {
     expect(obj.match?.tier).toBe("easy");
   });
 
-  test("leagues search --json returns matches", async () => {
-    const { stdout, exitCode } = await runCli(["search", "--json", "Willow longbow"]);
+  test("leagues search --all --json returns matches", async () => {
+    const { stdout, exitCode } = await runCli(["search", "--all", "--json", "Willow longbow"]);
     expect(exitCode).toBe(0);
     const obj = JSON.parse(stdout);
     expect(obj.count).toBeGreaterThan(0);
     expect(obj.tasks[0].name).toMatch(/Willow longbow/i);
+    expect(obj.player).toBeNull();
+  });
+
+  test("leagues search (default) filters completed for defaultPlayer", async () => {
+    const { stdout, exitCode } = await runCli(
+      ["search", "--json", "Catch a Herring"],
+      { LEAGUES_FIXTURE_DIR: FIXTURE_DIR }
+    );
+    expect(exitCode).toBe(0);
+    const obj = JSON.parse(stdout);
+    expect(obj.player).toBe("R amon");
   });
 
   test("leagues config --json dumps merged settings", async () => {

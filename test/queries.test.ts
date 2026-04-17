@@ -48,6 +48,16 @@ describe("matchesFilter", () => {
     expect(matchesFilter(catalog[3]!, { area: "Tirannwn" })).toBe(true);
     expect(matchesFilter(catalog[3]!, { area: "general" })).toBe(false);
   });
+
+  test("areas set matches any (case-insensitive)", () => {
+    expect(matchesFilter(catalog[3]!, { areas: ["general", "Tirannwn"] })).toBe(true);
+    expect(matchesFilter(catalog[3]!, { areas: ["general", "kourend"] })).toBe(false);
+    expect(matchesFilter(catalog[0]!, { areas: ["general"] })).toBe(true);
+  });
+
+  test("empty areas array is treated as no filter", () => {
+    expect(matchesFilter(catalog[3]!, { areas: [] })).toBe(true);
+  });
 });
 
 describe("filterMissing", () => {

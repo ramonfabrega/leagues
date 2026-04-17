@@ -24,7 +24,7 @@ export default function Easiest({ options }: Props) {
     <CommandBody<Payload>
       run={async () => {
         const player = await getPlayerProgress(await resolvePlayer(options.player));
-        const tasks = await easiestMissing(player, buildFilter(options), options.limit);
+        const tasks = await easiestMissing(player, await buildFilter(options), options.limit);
         return { player: player.username, count: tasks.length, tasks };
       }}
       json={options.json}

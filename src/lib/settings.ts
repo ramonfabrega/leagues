@@ -1,6 +1,7 @@
 import path from "node:path";
 import { unlink } from "node:fs/promises";
 import { z } from "zod";
+import { REGIONS, type Region } from "./catalog";
 
 const ROOT = path.join(import.meta.dir, "../..");
 const PROJECT_CONFIG_PATH = path.join(ROOT, "leagues.config.json");
@@ -11,6 +12,7 @@ export const ProjectConfigSchema = z.object({
   wikiTasksUrl: z.url(),
   players: z.array(z.string().min(1)).min(1),
   defaultPlayer: z.string().min(1),
+  unlockedRegions: z.array(z.enum(REGIONS)).optional(),
 });
 export type ProjectConfig = z.infer<typeof ProjectConfigSchema>;
 
@@ -25,6 +27,7 @@ export type Settings = {
   wikiTasksUrl: string;
   players: string[];
   defaultPlayer: string;
+  unlockedRegions: Region[];
   sources: { project: string; local: string | null };
   overrides: {
     defaultPlayer: string | null;
@@ -85,6 +88,23 @@ export async function removeExtraPlayer(rsn: string): Promise<Settings> {
   return await writeLocal({ ...(local ?? {}), extraPlayers: next });
 }
 
+export const ALWAYS_UNLOCKED: Region[] = ["karamja"];
+
+export async function setUnlockedRegions(regions: Region[]): Promise<Settings> {
+  const project = await readProjectConfig();
+  const dedup: Region[] = [];
+  for (const r of regions) if (!dedup.includes(r)) dedup.push(r);
+  for (const r of ALWAYS_UNLOCKED) if (!dedup.includes(r)) dedup.push(r);
+  const sorted = REGIONS.filter((r) => dedup.includes(r));
+  return await writeProject({ ...project, unlockedRegions: sorted });
+}
+
+export function effectiveUnlockedRegions(regions: Region[]): Region[] {
+  const set = new Set<Region>(regions);
+  for (const r of ALWAYS_UNLOCKED) set.add(r);
+  return REGIONS.filter((r) => set.has(r));
+}
+
 export async function resetLocalConfig(): Promise<{ settings: Settings; removed: boolean }> {
   const file = Bun.file(LOCAL_CONFIG_PATH);
   const existed = await file.exists();
@@ -128,6 +148,12 @@ async function writeLocal(local: LocalConfig): Promise<Settings> {
   return await loadSettings();
 }
 
+async function writeProject(project: ProjectConfig): Promise<Settings> {
+  await Bun.write(PROJECT_CONFIG_PATH, JSON.stringify(project, null, 2) + "\n");
+  cached = null;
+  return await loadSettings();
+}
+
 export function mergeSettings(project: ProjectConfig, local: LocalConfig | null): Settings {
   const extraPlayers = local?.extraPlayers ?? [];
   const players = [...project.players];
@@ -146,6 +172,7 @@ export function mergeSettings(project: ProjectConfig, local: LocalConfig | null)
     wikiTasksUrl: project.wikiTasksUrl,
     players,
     defaultPlayer,
+    unlockedRegions: project.unlockedRegions ?? [],
     sources: { project: PROJECT_CONFIG_PATH, local: local ? LOCAL_CONFIG_PATH : null },
     overrides: {
       defaultPlayer: local?.defaultPlayer ?? null,

@@ -3,6 +3,20 @@ import { z } from "zod";
 
 export const TIERS = ["easy", "medium", "hard", "elite", "master"] as const;
 
+export const REGIONS = [
+  "asgarnia",
+  "desert",
+  "fremennik",
+  "kandarin",
+  "karamja",
+  "kourend",
+  "morytania",
+  "tirannwn",
+  "varlamore",
+  "wilderness",
+] as const;
+export type Region = (typeof REGIONS)[number];
+
 const TaskSchema = z.object({
   id: z.number().int().nonnegative(),
   name: z.string().min(1),
