@@ -4,7 +4,10 @@ import type { Settings } from "../lib/settings";
 export function ConfigView({ settings }: { settings: Settings }) {
   const { overrides } = settings;
   const hasLocal = settings.sources.local !== null;
-  const hasAnyOverride = overrides.defaultPlayer !== null || overrides.extraPlayers.length > 0;
+  const hasAnyOverride =
+    overrides.defaultPlayer !== null ||
+    overrides.extraPlayers.length > 0 ||
+    overrides.unlockedRegions !== null;
   return (
     <Box flexDirection="column">
       <Text bold>Effective configuration</Text>
@@ -42,6 +45,9 @@ export function ConfigView({ settings }: { settings: Settings }) {
           ) : null}
           {overrides.extraPlayers.length > 0 ? (
             <Text><Text color="gray">  extraPlayers:  </Text>[{overrides.extraPlayers.join(", ")}]</Text>
+          ) : null}
+          {overrides.unlockedRegions ? (
+            <Text><Text color="gray">  unlockedRegions: </Text>[{overrides.unlockedRegions.join(", ")}]</Text>
           ) : null}
           {!hasAnyOverride ? <Text color="gray">  (empty)</Text> : null}
         </Box>

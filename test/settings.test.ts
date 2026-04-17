@@ -73,20 +73,29 @@ describe("effectiveUnlockedRegions", () => {
   });
 });
 
-describe("ProjectConfigSchema unlockedRegions", () => {
+describe("LocalConfigSchema unlockedRegions", () => {
   test("accepts known regions", () => {
-    const r = ProjectConfigSchema.safeParse({ ...project, unlockedRegions: ["karamja", "desert"] });
+    const r = LocalConfigSchema.safeParse({ unlockedRegions: ["karamja", "desert"] });
     expect(r.success).toBe(true);
   });
 
   test("rejects unknown region", () => {
-    const r = ProjectConfigSchema.safeParse({ ...project, unlockedRegions: ["atlantis"] });
+    const r = LocalConfigSchema.safeParse({ unlockedRegions: ["atlantis"] });
     expect(r.success).toBe(false);
   });
+});
 
-  test("omitted is fine", () => {
-    const r = ProjectConfigSchema.safeParse(project);
-    expect(r.success).toBe(true);
+describe("mergeSettings unlockedRegions", () => {
+  test("no local → empty", () => {
+    const s = mergeSettings(project, null);
+    expect(s.unlockedRegions).toEqual([]);
+    expect(s.overrides.unlockedRegions).toBeNull();
+  });
+
+  test("local sets unlockedRegions", () => {
+    const s = mergeSettings(project, { unlockedRegions: ["karamja", "tirannwn"] });
+    expect(s.unlockedRegions).toEqual(["karamja", "tirannwn"]);
+    expect(s.overrides.unlockedRegions).toEqual(["karamja", "tirannwn"]);
   });
 });
 

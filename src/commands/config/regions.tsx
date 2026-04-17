@@ -5,7 +5,7 @@ import { loadSettings } from "../../lib/settings";
 import { RegionsSelect } from "../../components/RegionsSelect";
 import type { Region } from "../../lib/catalog";
 
-export const description = "Toggle unlocked regions interactively (writes leagues.config.json)";
+export const description = "Toggle unlocked regions interactively (writes leagues.local.json)";
 
 export const options = z.object({});
 

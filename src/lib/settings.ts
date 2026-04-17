@@ -12,13 +12,13 @@ export const ProjectConfigSchema = z.object({
   wikiTasksUrl: z.url(),
   players: z.array(z.string().min(1)).min(1),
   defaultPlayer: z.string().min(1),
-  unlockedRegions: z.array(z.enum(REGIONS)).optional(),
 });
 export type ProjectConfig = z.infer<typeof ProjectConfigSchema>;
 
 export const LocalConfigSchema = z.object({
   defaultPlayer: z.string().min(1).optional(),
   extraPlayers: z.array(z.string().min(1)).optional(),
+  unlockedRegions: z.array(z.enum(REGIONS)).optional(),
 });
 type LocalConfig = z.infer<typeof LocalConfigSchema>;
 
@@ -32,6 +32,7 @@ export type Settings = {
   overrides: {
     defaultPlayer: string | null;
     extraPlayers: string[];
+    unlockedRegions: Region[] | null;
   };
 };
 
@@ -91,12 +92,9 @@ export async function removeExtraPlayer(rsn: string): Promise<Settings> {
 export const ALWAYS_UNLOCKED: Region[] = ["karamja"];
 
 export async function setUnlockedRegions(regions: Region[]): Promise<Settings> {
-  const project = await readProjectConfig();
-  const dedup: Region[] = [];
-  for (const r of regions) if (!dedup.includes(r)) dedup.push(r);
-  for (const r of ALWAYS_UNLOCKED) if (!dedup.includes(r)) dedup.push(r);
-  const sorted = REGIONS.filter((r) => dedup.includes(r));
-  return await writeProject({ ...project, unlockedRegions: sorted });
+  const local = await readLocalConfig();
+  const sorted = REGIONS.filter((r) => regions.includes(r) || ALWAYS_UNLOCKED.includes(r));
+  return await writeLocal({ ...(local ?? {}), unlockedRegions: sorted });
 }
 
 export function effectiveUnlockedRegions(regions: Region[]): Region[] {
@@ -148,12 +146,6 @@ async function writeLocal(local: LocalConfig): Promise<Settings> {
   return await loadSettings();
 }
 
-async function writeProject(project: ProjectConfig): Promise<Settings> {
-  await Bun.write(PROJECT_CONFIG_PATH, JSON.stringify(project, null, 2) + "\n");
-  cached = null;
-  return await loadSettings();
-}
-
 export function mergeSettings(project: ProjectConfig, local: LocalConfig | null): Settings {
   const extraPlayers = local?.extraPlayers ?? [];
   const players = [...project.players];
@@ -172,11 +164,12 @@ export function mergeSettings(project: ProjectConfig, local: LocalConfig | null)
     wikiTasksUrl: project.wikiTasksUrl,
     players,
     defaultPlayer,
-    unlockedRegions: project.unlockedRegions ?? [],
+    unlockedRegions: local?.unlockedRegions ?? [],
     sources: { project: PROJECT_CONFIG_PATH, local: local ? LOCAL_CONFIG_PATH : null },
     overrides: {
       defaultPlayer: local?.defaultPlayer ?? null,
       extraPlayers,
+      unlockedRegions: local?.unlockedRegions ?? null,
     },
   };
 }
