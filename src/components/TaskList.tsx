@@ -1,16 +1,6 @@
-import React from "react";
 import { Text, Box } from "ink";
-import type { Task, Tier } from "../lib/catalog";
-
-const TIER_ORDER: Tier[] = ["easy", "medium", "hard", "elite", "master"];
-
-const TIER_COLOR: Record<Tier, string> = {
-  easy: "green",
-  medium: "cyan",
-  hard: "yellow",
-  elite: "magenta",
-  master: "red",
-};
+import { TIERS, type Task } from "../lib/catalog";
+import { tierColor } from "./TierLabel";
 
 function completionColor(pct: number | null): string {
   if (pct === null) return "gray";
@@ -35,36 +25,45 @@ function formatReqs(t: Task): string {
   return "";
 }
 
-export function TaskList({ label, tasks }: { label: string; tasks: Task[] }) {
+export function TaskList({
+  label,
+  tasks,
+  showCount = true,
+}: {
+  label: string;
+  tasks: Task[];
+  showCount?: boolean;
+}) {
   if (tasks.length === 0) {
     return <Text color="gray">{label}: none</Text>;
   }
-  const grouped = new Map<Tier, Task[]>();
+  const grouped = new Map<string, Task[]>();
   for (const t of tasks) {
     if (!grouped.has(t.tier)) grouped.set(t.tier, []);
     grouped.get(t.tier)!.push(t);
   }
   return (
     <Box flexDirection="column">
-      <Text bold>{label} ({tasks.length})</Text>
-      {TIER_ORDER.map((tier) => {
+      <Text bold underline>{label}{showCount ? ` (${tasks.length})` : ""}</Text>
+      {TIERS.map((tier) => {
         const group = grouped.get(tier);
         if (!group?.length) return null;
         return (
           <Box key={tier} flexDirection="column" marginTop={1}>
-            <Text color={TIER_COLOR[tier]} bold>
+            <Text color={tierColor(tier)} bold>
               {tier} · {group[0]!.points}pts · {group.length} task{group.length === 1 ? "" : "s"}
             </Text>
-            {group.map((t) => (
-              <Text key={t.id}>
+            {group.map((t) => {
+              const reqs = formatReqs(t);
+              return (
+                <Text key={t.id}>
                   <Text color={completionColor(t.completionPct)}>{formatPct(t.completionPct)}</Text>
                   {"  "}
                   {t.name}
-                  {formatReqs(t) ? (
-                    <Text color="gray"> {formatReqs(t)}</Text>
-                  ) : null}
-              </Text>
-            ))}
+                  {reqs ? <Text color="gray"> {reqs}</Text> : null}
+                </Text>
+              );
+            })}
           </Box>
         );
       })}

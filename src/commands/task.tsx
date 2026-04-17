@@ -1,4 +1,3 @@
-import React from "react";
 import { z } from "zod";
 import { argument } from "pastel";
 import { taskByName, findTasks, type Task } from "../lib/catalog";

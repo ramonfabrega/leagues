@@ -1,4 +1,3 @@
-import React from "react";
 import { z } from "zod";
 import { Text } from "ink";
 import { deleteLocalConfig, LOCAL_CONFIG_PATH } from "../../lib/settings";

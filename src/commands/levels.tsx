@@ -1,4 +1,3 @@
-import React from "react";
 import { z } from "zod";
 import { option } from "pastel";
 import { loadSettings, resolvePlayer } from "../lib/settings";

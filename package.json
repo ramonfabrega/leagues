@@ -1,13 +1,11 @@
 {
   "name": "leagues",
-  "module": "src/cli.tsx",
   "type": "module",
   "bin": {
     "leagues": "./src/cli.tsx"
   },
   "scripts": {
     "start": "bun src/cli.tsx",
-    "test": "bun test",
     "typecheck": "bun tsc --noEmit",
     "postinstall": "bun link"
   },

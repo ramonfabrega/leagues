@@ -1,4 +1,4 @@
-import React, { Suspense, use, useEffect, useMemo } from "react";
+import { Component, Suspense, use, useEffect, useState, type ReactNode } from "react";
 import { Text, useApp } from "ink";
 
 export function Loading({ label = "Working" }: { label?: string }) {
@@ -9,8 +9,8 @@ function ErrorMessage({ error }: { error: Error }) {
   return <Text color="red">Error: {error.message}</Text>;
 }
 
-class CommandErrorBoundary extends React.Component<
-  { children: React.ReactNode; onError: (error: Error) => void },
+class CommandErrorBoundary extends Component<
+  { children: ReactNode; onError: (error: Error) => void },
   { error: Error | null }
 > {
   state: { error: Error | null } = { error: null };
@@ -29,16 +29,17 @@ class CommandErrorBoundary extends React.Component<
 type AsyncContentProps<T> = {
   promise: Promise<T>;
   json: boolean;
-  render: (data: T) => React.ReactNode;
+  render: (data: T) => ReactNode;
 };
 
 function AsyncContent<T>({ promise, json, render }: AsyncContentProps<T>) {
   const data = use(promise);
   const { exit } = useApp();
   useEffect(() => {
+    if (json) process.stdout.write(JSON.stringify(data, null, 2) + "\n");
     exit();
-  }, [exit]);
-  if (json) return <Text>{JSON.stringify(data, null, 2)}</Text>;
+  }, [exit, json, data]);
+  if (json) return null;
   return <>{render(data)}</>;
 }
 
@@ -46,12 +47,12 @@ type CommandBodyProps<T> = {
   run: () => Promise<T>;
   json?: boolean;
   loadingLabel?: string;
-  children: (data: T) => React.ReactNode;
+  children: (data: T) => ReactNode;
 };
 
 export function CommandBody<T>({ run, json, loadingLabel, children }: CommandBodyProps<T>) {
   const { exit } = useApp();
-  const promise = useMemo(() => run(), []); // eslint-disable-line react-hooks/exhaustive-deps
+  const [promise] = useState(() => run());
   return (
     <CommandErrorBoundary
       onError={(err) => {

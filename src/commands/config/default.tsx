@@ -1,4 +1,3 @@
-import React from "react";
 import { z } from "zod";
 import { argument } from "pastel";
 import { Text, Box } from "ink";

@@ -1,16 +1,7 @@
-import React from "react";
 import { Text, Box } from "ink";
-import type { Tier } from "../lib/catalog";
+import { TIERS } from "../lib/catalog";
+import { tierColor } from "./TierLabel";
 import type { TierBreakdown } from "../lib/queries";
-
-const TIER_ORDER: Tier[] = ["easy", "medium", "hard", "elite", "master"];
-const TIER_COLOR: Record<Tier, string> = {
-  easy: "green",
-  medium: "cyan",
-  hard: "yellow",
-  elite: "magenta",
-  master: "red",
-};
 
 export type SummaryPayload = {
   username: string;
@@ -33,13 +24,13 @@ export function SummaryView(p: SummaryPayload) {
 
       <Box flexDirection="column" marginTop={1}>
         <Text bold>By tier</Text>
-        {TIER_ORDER.map((tier) => {
+        {TIERS.map((tier) => {
           const done = p.byTier[tier];
           const total = p.totalByTier[tier];
           const pct = total.count === 0 ? 0 : (done.count / total.count) * 100;
           return (
             <Text key={tier}>
-              <Text color={TIER_COLOR[tier]}>  {tier.padEnd(7)}</Text>
+              <Text color={tierColor(tier)}>  {tier.padEnd(7)}</Text>
               {String(done.count).padStart(3)} / {String(total.count).padEnd(4)}
               ({pct.toFixed(0).padStart(3)}%)
               <Text color="gray">   {done.points.toLocaleString()} / {total.points.toLocaleString()} pts</Text>

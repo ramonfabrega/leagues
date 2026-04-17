@@ -2,37 +2,31 @@ import path from "node:path";
 import { z } from "zod";
 
 export const TIERS = ["easy", "medium", "hard", "elite", "master"] as const;
-export const TierSchema = z.enum(TIERS);
-export type Tier = z.infer<typeof TierSchema>;
 
-export const SkillRequirementSchema = z.object({
-  skill: z.string(),
-  level: z.number().int().nonnegative(),
-});
-export type SkillRequirement = z.infer<typeof SkillRequirementSchema>;
-
-export const TaskSchema = z.object({
+const TaskSchema = z.object({
   id: z.number().int().nonnegative(),
   name: z.string().min(1),
   description: z.string(),
   points: z.number().int().nonnegative(),
-  tier: TierSchema,
+  tier: z.enum(TIERS),
   area: z.string().min(1),
   isPactTask: z.boolean(),
   completionPct: z.number().nullable(),
   requirements: z.object({
-    skills: z.array(SkillRequirementSchema),
+    skills: z.array(z.object({ skill: z.string(), level: z.number().int().nonnegative() })),
     other: z.string().nullable(),
   }),
 });
-export type Task = z.infer<typeof TaskSchema>;
 
-export const CatalogSchema = z.object({
+const CatalogSchema = z.object({
   league: z.string(),
   scrapedAt: z.string(),
   source: z.string(),
   tasks: z.array(TaskSchema),
 });
+
+export type Task = z.infer<typeof TaskSchema>;
+export type Tier = z.infer<typeof TaskSchema>["tier"];
 export type Catalog = z.infer<typeof CatalogSchema>;
 
 const CATALOG_PATH = path.join(import.meta.dir, "../../data/tasks.json");
@@ -47,8 +41,7 @@ export async function loadCatalog(): Promise<Catalog> {
   if (!(await file.exists())) {
     throw new Error(`data/tasks.json not found. Run "leagues scrape" to generate it.`);
   }
-  const raw = await file.json();
-  const parsed = CatalogSchema.safeParse(raw);
+  const parsed = CatalogSchema.safeParse(await file.json());
   if (!parsed.success) {
     throw new Error(
       `data/tasks.json is malformed — re-run "leagues scrape":\n${z.prettifyError(parsed.error)}`
@@ -86,5 +79,3 @@ export async function findTasks(query: string): Promise<Task[]> {
     (t) => t.name.toLowerCase().includes(q) || t.description.toLowerCase().includes(q)
   );
 }
-
-export const CATALOG_FILE_PATH = CATALOG_PATH;

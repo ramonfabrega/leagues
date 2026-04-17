@@ -1,46 +1,38 @@
-import React from "react";
 import { Text, Box } from "ink";
-import type { Task, Tier } from "../lib/catalog";
+import type { Task } from "../lib/catalog";
+import { TierLabel } from "./TierLabel";
 
-const TIER_COLOR: Record<Tier, string> = {
-  easy: "green",
-  medium: "cyan",
-  hard: "yellow",
-  elite: "magenta",
-  master: "red",
-};
+function formatPct(pct: number | null): string {
+  if (pct === null) return "N/A";
+  if (pct < 0.1) return "<0.1%";
+  return `${pct.toFixed(1)}%`;
+}
 
 export function TaskDetailsView({ task }: { task: Task }) {
-  const pct = task.completionPct === null
-    ? "N/A"
-    : task.completionPct < 0.1
-      ? "<0.1%"
-      : `${task.completionPct.toFixed(1)}%`;
+  const reqs = task.requirements;
+  const hasReqs = reqs.skills.length > 0 || reqs.other;
   return (
     <Box flexDirection="column">
       <Text bold>#{task.id}  {task.name}</Text>
       <Text color="gray">{task.description}</Text>
       <Box marginTop={1}>
         <Text>
-          <Text color={TIER_COLOR[task.tier]} bold>{task.tier}</Text>
+          <TierLabel tier={task.tier} bold />
           {" · "}
           <Text color="yellow">{task.points} pts</Text>
           {" · "}
           <Text color="blue">{task.area}</Text>
           {task.isPactTask ? <Text color="magenta"> · pact</Text> : null}
-          {" · "}
-          <Text>completion {pct}</Text>
+          {" · completion "}{formatPct(task.completionPct)}
         </Text>
       </Box>
-      {task.requirements.skills.length > 0 || task.requirements.other ? (
+      {hasReqs ? (
         <Box marginTop={1} flexDirection="column">
           <Text bold>Requirements</Text>
-          {task.requirements.skills.map((r) => (
+          {reqs.skills.map((r) => (
             <Text key={r.skill}>  <Text color="cyan">{r.skill}</Text> {r.level}</Text>
           ))}
-          {task.requirements.other ? (
-            <Text>  <Text color="gray">{task.requirements.other}</Text></Text>
-          ) : null}
+          {reqs.other ? <Text color="gray">  {reqs.other}</Text> : null}
         </Box>
       ) : null}
     </Box>

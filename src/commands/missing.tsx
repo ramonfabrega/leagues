@@ -1,11 +1,10 @@
-import React from "react";
 import { z } from "zod";
 import { loadSettings, resolvePlayer } from "../lib/settings";
-import { getPlayerProgress, missingTasks, type TaskFilter } from "../lib/queries";
+import { getPlayerProgress, missingTasks } from "../lib/queries";
 import type { Task } from "../lib/catalog";
 import { CommandBody } from "../components/Async";
 import { TaskList } from "../components/TaskList";
-import { jsonOption, playerOption, limitOption, filterOptions } from "../lib/cli-options";
+import { buildFilter, filterOptions, jsonOption, limitOption, playerOption } from "../lib/cli-options";
 
 export const description = "Tasks the player has not completed";
 
@@ -17,27 +16,15 @@ export const options = z.object({
 });
 
 type Props = { options: z.infer<typeof options> };
-
 type Payload = { player: string; count: number; tasks: Task[] };
 
 export default function Missing({ options }: Props) {
-  const filter: TaskFilter = {
-    skill: options.skill,
-    tier: options.tier,
-    area: options.area,
-    maxPoints: options.maxPoints,
-    minPoints: options.minPoints,
-    minCompletionPct: options.minCompletion,
-    maxCompletionPct: options.maxCompletion,
-    pactOnly: options.pactOnly,
-  };
   return (
     <CommandBody<Payload>
       run={async () => {
         const settings = await loadSettings();
-        const rsn = resolvePlayer(settings, options.player);
-        const player = await getPlayerProgress(rsn);
-        const all = await missingTasks(player, filter);
+        const player = await getPlayerProgress(resolvePlayer(settings, options.player));
+        const all = await missingTasks(player, buildFilter(options));
         const tasks = options.limit ? all.slice(0, options.limit) : all;
         return { player: player.username, count: tasks.length, tasks };
       }}

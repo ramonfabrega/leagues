@@ -1,5 +1,5 @@
 import { fetchPlayer, type PlayerData } from "./api";
-import { loadCatalog, taskById, type Task, type Tier } from "./catalog";
+import { loadCatalog, taskById, TIERS, type Task, type Tier } from "./catalog";
 import { loadSettings } from "./settings";
 
 export type PlayerProgress = {
@@ -134,14 +134,9 @@ export function uniqueTasks(
 export type TierBreakdown = Record<Tier, { count: number; points: number }>;
 
 export function tierBreakdown(tasks: Task[]): TierBreakdown {
-  const empty = { count: 0, points: 0 };
-  const out: TierBreakdown = {
-    easy: { ...empty },
-    medium: { ...empty },
-    hard: { ...empty },
-    elite: { ...empty },
-    master: { ...empty },
-  };
+  const out = Object.fromEntries(
+    TIERS.map((t) => [t, { count: 0, points: 0 }])
+  ) as TierBreakdown;
   for (const t of tasks) {
     out[t.tier].count++;
     out[t.tier].points += t.points;

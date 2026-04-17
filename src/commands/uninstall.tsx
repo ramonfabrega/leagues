@@ -1,4 +1,3 @@
-import React from "react";
 import { z } from "zod";
 import { Text, Box } from "ink";
 import path from "node:path";
