@@ -13,14 +13,12 @@ type Snapshot = {
 };
 
 async function resolvePlayers(args: string[]): Promise<string[]> {
-  const settings = await loadSettings();
-  const players = args.length >= 2
-    ? args.map((a) => resolvePlayer(settings, a))
-    : [...settings.players];
+  if (args.length >= 2) return await Promise.all(args.map(resolvePlayer));
+  const { players } = await loadSettings();
   if (players.length < 2) {
     throw new Error("compare needs at least 2 players (pass them as args or configure them via leagues config)");
   }
-  return players;
+  return [...players];
 }
 
 async function buildSnapshot(players: string[]): Promise<Snapshot> {
@@ -127,7 +125,7 @@ function LiveBlock({ pct, tick, stats }: { pct: number; tick: number; stats: Pla
   );
 }
 
-function LogEntryView({ entry }: { entry: LogEntry }) {
+function LogEntryView({ entry, nameW }: { entry: LogEntry; nameW: number }) {
   if (entry.kind === "initial") {
     return (
       <Box flexDirection="column">
@@ -141,30 +139,28 @@ function LogEntryView({ entry }: { entry: LogEntry }) {
     );
   }
   if (entry.kind === "change") {
+    const rows: { sign: "+" | "-"; player: string; points: number; task: string; key: string }[] = [];
+    for (const c of entry.changes) {
+      for (const t of c.added) rows.push({ sign: "+", player: c.player, points: t.points, task: t.name, key: `a${t.id}` });
+      for (const t of c.removed) rows.push({ sign: "-", player: c.player, points: t.points, task: t.name, key: `r${t.id}` });
+    }
     return (
-      <Box flexDirection="column" marginTop={1}>
-        <Text bold color="yellow">━━ changes at {timeOf(entry.at)} ━━</Text>
-        {entry.changes.map((c) => (
-          <Box key={c.player} flexDirection="column" marginTop={1}>
-            {c.added.length > 0 ? (
-              <Box flexDirection="column">
-                <Text color="green">+ new unique for {c.player}</Text>
-                {c.added.map((t) => <Text key={t.id}>  {t.points}pts  {t.name}</Text>)}
-              </Box>
-            ) : null}
-            {c.removed.length > 0 ? (
-              <Box flexDirection="column">
-                <Text color="magenta">~ now common for {c.player}</Text>
-                {c.removed.map((t) => <Text key={t.id}>  {t.points}pts  {t.name}</Text>)}
-              </Box>
-            ) : null}
-          </Box>
+      <Box flexDirection="column">
+        {rows.map((r) => (
+          <Text key={r.key}>
+            <Text color="gray">{timeOf(entry.at)}</Text>
+            {"  "}{r.player.padEnd(nameW)}{"  "}
+            <Text color={r.sign === "+" ? "green" : "magenta"}>
+              {r.sign}{r.points.toString().padStart(3)}pts
+            </Text>
+            {"  "}{r.task}
+          </Text>
         ))}
       </Box>
     );
   }
   return (
-    <Text color="red">✗ {timeOf(entry.at)} {entry.message}</Text>
+    <Text color="red">{timeOf(entry.at)}  error  {entry.message}</Text>
   );
 }
 
@@ -239,10 +235,11 @@ export function CompareWatch({ args, intervalMs }: { args: string[]; intervalMs:
   if (!players) return <Text color="gray">loading settings…</Text>;
 
   const pct = Math.min(1, Math.max(0, now - lastPollAt) / intervalMs);
+  const nameW = Math.max(...players.map((p) => p.length));
 
   return (
     <>
-      <Static items={log}>{(entry) => <LogEntryView key={entry.id} entry={entry} />}</Static>
+      <Static items={log}>{(entry) => <LogEntryView key={entry.id} entry={entry} nameW={nameW} />}</Static>
       <Box marginTop={1}>
         <LiveBlock pct={pct} tick={tick} stats={statsFrom(players, snapshot)} />
       </Box>

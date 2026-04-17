@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { loadSettings, resolvePlayer } from "../lib/settings";
+import { resolvePlayer } from "../lib/settings";
 import { getPlayerProgress, missingTasks } from "../lib/queries";
 import type { Task } from "../lib/catalog";
 import { CommandBody } from "../components/Async";
@@ -22,8 +22,7 @@ export default function Missing({ options }: Props) {
   return (
     <CommandBody<Payload>
       run={async () => {
-        const settings = await loadSettings();
-        const player = await getPlayerProgress(resolvePlayer(settings, options.player));
+        const player = await getPlayerProgress(await resolvePlayer(options.player));
         const all = await missingTasks(player, buildFilter(options));
         const tasks = options.limit ? all.slice(0, options.limit) : all;
         return { player: player.username, count: tasks.length, tasks };

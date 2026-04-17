@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { option } from "pastel";
-import { loadSettings, resolvePlayer } from "../lib/settings";
+import { resolvePlayer } from "../lib/settings";
 import { easiestMissing, getPlayerProgress } from "../lib/queries";
 import type { Task } from "../lib/catalog";
 import { CommandBody } from "../components/Async";
@@ -23,8 +23,7 @@ export default function Easiest({ options }: Props) {
   return (
     <CommandBody<Payload>
       run={async () => {
-        const settings = await loadSettings();
-        const player = await getPlayerProgress(resolvePlayer(settings, options.player));
+        const player = await getPlayerProgress(await resolvePlayer(options.player));
         const tasks = await easiestMissing(player, buildFilter(options), options.limit);
         return { player: player.username, count: tasks.length, tasks };
       }}

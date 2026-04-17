@@ -44,9 +44,9 @@ describe("cli integration", () => {
     const { stdout, exitCode } = await runCli(["config", "--json"]);
     expect(exitCode).toBe(0);
     const obj = JSON.parse(stdout);
-    expect(obj.settings.league).toBeTruthy();
-    expect(Array.isArray(obj.settings.players)).toBe(true);
-    expect(obj.settings.defaultPlayer).toBeTruthy();
+    expect(obj.league).toBeTruthy();
+    expect(Array.isArray(obj.players)).toBe(true);
+    expect(obj.defaultPlayer).toBeTruthy();
   });
 
   test("leagues --help exits 0 and lists commands", async () => {

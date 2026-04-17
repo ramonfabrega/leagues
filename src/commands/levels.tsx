@@ -17,18 +17,16 @@ export const options = z.object({
 });
 
 type Props = { options: z.infer<typeof options> };
-
 type Payload = { players: string[]; diffs: LevelDiff[] };
 
 export default function Levels({ options }: Props) {
   return (
     <CommandBody<Payload>
       run={async () => {
-        const settings = await loadSettings();
         const rsns = options.players?.length
-          ? options.players.map((p) => resolvePlayer(settings, p))
-          : [...settings.players];
-        const progresses = await Promise.all(rsns.map((r) => getPlayerProgress(r)));
+          ? await Promise.all(options.players.map(resolvePlayer))
+          : (await loadSettings()).players;
+        const progresses = await Promise.all(rsns.map(getPlayerProgress));
         return { players: rsns, diffs: levelGaps(progresses) };
       }}
       json={options.json}

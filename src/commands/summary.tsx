@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { loadSettings, resolvePlayer } from "../lib/settings";
+import { resolvePlayer } from "../lib/settings";
 import {
   getPlayerProgress,
   tierBreakdown,
@@ -23,8 +23,7 @@ export default function Summary({ options }: Props) {
   return (
     <CommandBody<SummaryPayload>
       run={async () => {
-        const settings = await loadSettings();
-        const rsn = resolvePlayer(settings, options.player);
+        const rsn = await resolvePlayer(options.player);
         const [player, catalog] = await Promise.all([getPlayerProgress(rsn), loadCatalog()]);
         return {
           username: player.username,

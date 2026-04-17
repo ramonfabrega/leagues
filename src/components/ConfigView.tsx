@@ -1,13 +1,10 @@
 import { Text, Box } from "ink";
-import type { Settings, LocalConfig } from "../lib/settings";
+import type { Settings } from "../lib/settings";
 
-export function ConfigView({
-  settings,
-  local,
-}: {
-  settings: Settings;
-  local: LocalConfig | null;
-}) {
+export function ConfigView({ settings }: { settings: Settings }) {
+  const { overrides } = settings;
+  const hasLocal = settings.sources.local !== null;
+  const hasAnyOverride = overrides.defaultPlayer !== null || overrides.extraPlayers.length > 0;
   return (
     <Box flexDirection="column">
       <Text bold>Effective configuration</Text>
@@ -16,7 +13,7 @@ export function ConfigView({
       <Text>
         <Text color="gray">  defaultPlayer:  </Text>
         <Text bold color="yellow">{settings.defaultPlayer}</Text>
-        {local?.defaultPlayer ? <Text color="gray"> (from local override)</Text> : null}
+        {overrides.defaultPlayer ? <Text color="gray"> (from local override)</Text> : null}
       </Text>
       <Text><Text color="gray">  players:        </Text>[{settings.players.join(", ")}]</Text>
 
@@ -25,26 +22,22 @@ export function ConfigView({
         <Text><Text color="gray">  project: </Text>{settings.sources.project}</Text>
         <Text>
           <Text color="gray">  local:   </Text>
-          {settings.sources.local ? (
-            settings.sources.local
-          ) : (
+          {settings.sources.local ?? (
             <Text color="gray">(not set — run "leagues config default &lt;player&gt;" to create)</Text>
           )}
         </Text>
       </Box>
 
-      {local ? (
+      {hasLocal ? (
         <Box marginTop={1} flexDirection="column">
           <Text bold>Local overrides</Text>
-          {local.defaultPlayer ? (
-            <Text><Text color="gray">  defaultPlayer: </Text>{local.defaultPlayer}</Text>
+          {overrides.defaultPlayer ? (
+            <Text><Text color="gray">  defaultPlayer: </Text>{overrides.defaultPlayer}</Text>
           ) : null}
-          {local.extraPlayers?.length ? (
-            <Text><Text color="gray">  extraPlayers:  </Text>[{local.extraPlayers.join(", ")}]</Text>
+          {overrides.extraPlayers.length > 0 ? (
+            <Text><Text color="gray">  extraPlayers:  </Text>[{overrides.extraPlayers.join(", ")}]</Text>
           ) : null}
-          {!local.defaultPlayer && !local.extraPlayers?.length ? (
-            <Text color="gray">  (empty)</Text>
-          ) : null}
+          {!hasAnyOverride ? <Text color="gray">  (empty)</Text> : null}
         </Box>
       ) : null}
     </Box>

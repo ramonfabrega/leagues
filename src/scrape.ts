@@ -1,6 +1,5 @@
 import { JSDOM } from "jsdom";
-import { loadSettings } from "./lib/settings";
-import { fetchWikiTasksHtml } from "./lib/api";
+import { fetchTasksPage } from "./lib/api";
 import {
   writeCatalog,
   TIERS,
@@ -24,12 +23,11 @@ export function parseTasksHtml(html: string): Task[] {
 }
 
 async function scrape(): Promise<Catalog> {
-  const settings = await loadSettings();
-  const html = await fetchWikiTasksHtml(settings.wikiTasksUrl);
+  const { html, league, source } = await fetchTasksPage();
   return {
-    league: settings.league,
+    league,
     scrapedAt: new Date().toISOString(),
-    source: settings.wikiTasksUrl,
+    source,
     tasks: parseTasksHtml(html),
   };
 }

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { option } from "pastel";
-import { loadSettings, resolvePlayer, otherPlayers } from "../lib/settings";
+import { otherPlayers, resolvePlayer } from "../lib/settings";
 import { getPlayerProgress, uniqueTasks } from "../lib/queries";
 import type { Task } from "../lib/catalog";
 import { CommandBody } from "../components/Async";
@@ -26,13 +26,12 @@ export default function UniqueCmd({ options }: Props) {
   return (
     <CommandBody<Payload>
       run={async () => {
-        const settings = await loadSettings();
-        const targetName = resolvePlayer(settings, options.player);
+        const targetName = await resolvePlayer(options.player);
         const vsNames = options.vs?.length
-          ? options.vs.map((s) => resolvePlayer(settings, s.trim()))
-          : otherPlayers(settings, targetName);
+          ? await Promise.all(options.vs.map((s) => resolvePlayer(s.trim())))
+          : await otherPlayers(targetName);
         const [target, ...others] = await Promise.all(
-          [targetName, ...vsNames].map((n) => getPlayerProgress(n))
+          [targetName, ...vsNames].map(getPlayerProgress)
         );
         const tasks = uniqueTasks(target!, others);
         return { player: target!.username, vs: vsNames, count: tasks.length, tasks };
