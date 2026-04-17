@@ -42,7 +42,6 @@ leagues missing --skill Fletching                    # missing tasks (respects u
 leagues missing --all-regions                        # ignore unlockedRegions filter
 leagues easiest --skill Fletching --limit 10         # sorted by highest wiki %
 leagues levels                                       # level gaps across players
-leagues task "Fletch 50 Willow longbow (u)"          # task details
 leagues search fletch                                # free-text search (excludes completed)
 leagues search fletch --all                          # include completed + all regions
 leagues config regions                               # interactive multi-select unlock editor

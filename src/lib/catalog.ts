@@ -47,7 +47,6 @@ const CATALOG_PATH = path.join(import.meta.dir, "../../data/tasks.json");
 
 let cached: Catalog | null = null;
 let cachedById: Map<number, Task> | null = null;
-let cachedByName: Map<string, Task> | null = null;
 
 export async function loadCatalog(): Promise<Catalog> {
   if (cached) return cached;
@@ -69,21 +68,12 @@ export async function writeCatalog(catalog: Catalog): Promise<void> {
   await Bun.write(CATALOG_PATH, JSON.stringify(catalog, null, 2) + "\n");
   cached = catalog;
   cachedById = null;
-  cachedByName = null;
 }
 
 export async function taskById(id: number | string): Promise<Task | undefined> {
   const { tasks } = await loadCatalog();
   if (!cachedById) cachedById = new Map(tasks.map((t) => [t.id, t]));
   return cachedById.get(Number(id));
-}
-
-export async function taskByName(name: string): Promise<Task | undefined> {
-  const { tasks } = await loadCatalog();
-  if (!cachedByName) {
-    cachedByName = new Map(tasks.map((t) => [t.name.toLowerCase(), t]));
-  }
-  return cachedByName.get(name.toLowerCase());
 }
 
 export async function findTasks(query: string): Promise<Task[]> {

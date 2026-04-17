@@ -20,8 +20,7 @@ leagues easiest [--player X] [filters]          # missing tasks sorted by highes
 leagues unique [--player X] [--vs A --vs B]     # tasks this player has that others don't
 leagues summary [--player X]                    # counts, points, tier/area breakdown
 leagues levels [--players A --players B]        # skill level gaps
-leagues task "<exact name>"                     # show a single task (or fuzzy suggestions)
-leagues search "<substring>"                    # task name + description search
+leagues search "<substring>" [--all] [--all-regions]  # task name + description search (default: excludes completed + filters by unlocked regions)
 leagues scrape                                  # refresh data/tasks.json from the wiki
 leagues config [subcommand]                     # view/edit per-user defaults (see below)
 ```
@@ -30,9 +29,10 @@ leagues config [subcommand]                     # view/edit per-user defaults (s
 
 ```
 leagues config                          # show effective merged config
-leagues config default <player>         # set per-user default player
+leagues config default [<player>]       # set per-user default player (omit arg for interactive picker)
 leagues config add-player <player>      # add to per-user extraPlayers
-leagues config remove-player <player>   # remove from extraPlayers
+leagues config remove-player [<player>] # remove from extraPlayers (omit arg for interactive picker)
+leagues config regions                  # interactive multi-select of unlocked regions
 leagues config reset                    # delete leagues.local.json
 ```
 
@@ -61,7 +61,7 @@ Use `leagues config --json` to read the effective config programmatically (usefu
 | "compare me and greenbay" | `leagues compare "R amon" "greenbay420"` |
 | "what 30pt tasks am I missing?" | `leagues missing --min-points 30 --max-points 30 --json` |
 | "what tirannwn tasks am I missing?" | `leagues missing --area tirannwn --json` |
-| "what's the completion % for X?" | `leagues task "X"` |
+| "what's the completion % for X?" | `leagues search "X" --all --json` |
 | "who's ahead on fletching?" | `leagues levels --json` |
 
 ## Filtering semantics
