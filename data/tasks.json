@@ -1,6 +1,6 @@
 {
   "league": "DEMONIC_PACTS_LEAGUE",
-  "scrapedAt": "2026-04-17T08:03:13.555Z",
+  "scrapedAt": "2026-04-17T17:27:57.834Z",
   "source": "https://oldschool.runescape.wiki/w/Demonic_Pacts_League/Tasks",
   "tasks": [
     {
@@ -2517,7 +2517,7 @@
     {
       "id": 165,
       "name": "Enter Level 3 of the Chasm of Fire",
-      "description": "Enter the 3rd level of the Chasm of Fire in Shayzien.",
+      "description": "Enter the 3rd level of the Chasm of Fire in Shayzien, finishing the dialogue.",
       "points": 10,
       "tier": "easy",
       "area": "kourend",
@@ -2656,7 +2656,7 @@
             "level": 10
           }
         ],
-        "other": "or Wilderness✓Partial completion of The Knight's Sword"
+        "other": "or Wilderness✓Partial completion of The Knight's Sword. Known issue: Cannot be completed (all)"
       }
     },
     {
@@ -7160,7 +7160,7 @@
             "level": 65
           }
         ],
-        "other": null
+        "other": "Known issue: Not tracked correctly (all)"
       }
     },
     {
@@ -7756,7 +7756,7 @@
             "level": 35
           }
         ],
-        "other": null
+        "other": "Known issue: Not correctly tracked (all)"
       }
     },
     {
@@ -7808,7 +7808,7 @@
       "completionPct": 0.05,
       "requirements": {
         "skills": [],
-        "other": null
+        "other": "Known issue: Cannot be completed (all)"
       }
     },
     {
@@ -9179,7 +9179,7 @@
       "completionPct": 5.4,
       "requirements": {
         "skills": [],
-        "other": "Completion of Tower of Life"
+        "other": "Completion of Tower of LifeNote: This task requires access to Asgarnia to obtain the Raw cave eel."
       }
     },
     {
@@ -16975,7 +16975,7 @@
       "completionPct": 0.05,
       "requirements": {
         "skills": [],
-        "other": "Completion of Tower of Life"
+        "other": "Completion of Tower of LifeNote: This task is impossible, as it requires completion of the Freeing Skrach Uglogwee subquest of Recipe for Disaster to obtain Raw jubbly."
       }
     },
     {
@@ -20077,7 +20077,7 @@
             "level": 65
           }
         ],
-        "other": "Completion of Knight Waves or the Arcane relic"
+        "other": "Completion of Knight Waves or the Grimoire (Demonic Pacts League) relic"
       }
     },
     {
@@ -26198,7 +26198,7 @@
             "level": 90
           }
         ],
-        "other": null
+        "other": "Known issue: Doesn't work when using Woodsman (all)"
       }
     },
     {
@@ -26620,7 +26620,7 @@
             "level": 90
           }
         ],
-        "other": "Fire cape"
+        "other": "Fire cape Known issue: Doesn't work when using Larcenist (all)"
       }
     },
     {
