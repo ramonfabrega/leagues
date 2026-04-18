@@ -33,7 +33,18 @@ export const options = z.object({
 
 type Props = { args: z.infer<typeof args>; options: z.infer<typeof options> };
 
+let altScreenEntered = false;
+function enterAltScreen() {
+  if (altScreenEntered || !process.stdout.isTTY) return;
+  altScreenEntered = true;
+  process.stdout.write("\x1b[?1049h\x1b[H");
+  process.once("exit", () => {
+    process.stdout.write("\x1b[?1049l");
+  });
+}
+
 export default function Compare({ args, options }: Props) {
+  if (options.watch) enterAltScreen();
   return options.watch ? (
     <CompareWatch args={args} intervalMs={options.interval * 1000} />
   ) : (

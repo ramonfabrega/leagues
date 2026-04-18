@@ -52,13 +52,17 @@ function diffIds(prev: Task[], next: Task[]): { added: Task[]; removed: Task[] }
 
 function CompareOnceResult({ players, snapshot }: { players: string[]; snapshot: Snapshot }) {
   return (
-    <Box flexDirection="column">
-      {players.map((p) => (
-        <Box key={p} marginTop={1}>
-          <TaskList label={p} tasks={snapshot.unique[p] ?? []} showCount={false} />
+    <Static items={[{ players, snapshot }]}>
+      {(item) => (
+        <Box key="once" flexDirection="column">
+          {item.players.map((p) => (
+            <Box key={p} marginTop={1}>
+              <TaskList label={p} tasks={item.snapshot.unique[p] ?? []} showCount={false} />
+            </Box>
+          ))}
         </Box>
-      ))}
-    </Box>
+      )}
+    </Static>
   );
 }
 
