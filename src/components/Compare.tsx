@@ -80,8 +80,13 @@ export function CompareOnce({ args, json }: { args: string[]; json?: boolean }) 
 type Change = { player: string; added: Task[]; removed: Task[] };
 
 type LogEntryBody =
-  | { kind: "initial"; players: string[]; snapshot: Snapshot }
-  | { kind: "change"; at: string; changes: Change[] }
+  | {
+      kind: "snapshot";
+      at: string;
+      players: string[];
+      unique: Record<string, Task[]>;
+      changes: Change[];
+    }
   | { kind: "error"; at: string; message: string };
 
 type LogEntry = LogEntryBody & { id: string };
@@ -134,19 +139,8 @@ function LiveBlock({ pct, tick, stats }: { pct: number; tick: number; stats: Pla
 }
 
 function LogEntryView({ entry, nameW }: { entry: LogEntry; nameW: number }) {
-  if (entry.kind === "initial") {
-    return (
-      <Box flexDirection="column">
-        <Text color="gray">━━ initial snapshot at {timeOf(entry.snapshot.at)} ━━</Text>
-        {entry.players.map((p) => (
-          <Box key={p} marginTop={1}>
-            <TaskList label={p} tasks={entry.snapshot.unique[p] ?? []} showCount={false} />
-          </Box>
-        ))}
-      </Box>
-    );
-  }
-  if (entry.kind === "change") {
+  if (entry.kind === "snapshot") {
+    const isInitial = entry.changes.length === 0;
     const rows: { sign: "+" | "-"; player: string; points: number; task: string; key: string }[] =
       [];
     for (const c of entry.changes) {
@@ -156,21 +150,33 @@ function LogEntryView({ entry, nameW }: { entry: LogEntry; nameW: number }) {
         rows.push({ sign: "-", player: c.player, points: t.points, task: t.name, key: `r${t.id}` });
     }
     return (
-      <Box flexDirection="column" marginTop={1}>
-        {rows.map((r) => (
-          <Text key={r.key}>
-            <Text color="gray">{timeOf(entry.at)}</Text>
-            {"  "}
-            {r.player.padEnd(nameW)}
-            {"  "}
-            <Text color={r.sign === "+" ? "green" : "magenta"}>
-              {r.sign}
-              {r.points.toString().padStart(3)}pts
-            </Text>
-            {"  "}
-            {r.task}
-          </Text>
+      <Box flexDirection="column" marginTop={isInitial ? 0 : 1}>
+        <Text color="gray">
+          ━━ {isInitial ? "initial snapshot" : "update"} at {timeOf(entry.at)} ━━
+        </Text>
+        {entry.players.map((p) => (
+          <Box key={p} marginTop={1}>
+            <TaskList label={p} tasks={entry.unique[p] ?? []} showCount={false} />
+          </Box>
         ))}
+        {rows.length > 0 ? (
+          <Box flexDirection="column" marginTop={1}>
+            {rows.map((r) => (
+              <Text key={r.key}>
+                <Text color="gray">{timeOf(entry.at)}</Text>
+                {"  "}
+                {r.player.padEnd(nameW)}
+                {"  "}
+                <Text color={r.sign === "+" ? "green" : "magenta"}>
+                  {r.sign}
+                  {r.points.toString().padStart(3)}pts
+                </Text>
+                {"  "}
+                {r.task}
+              </Text>
+            ))}
+          </Box>
+        ) : null}
       </Box>
     );
   }
@@ -206,14 +212,16 @@ export function CompareWatch({ args, intervalMs }: { args: string[]; intervalMs:
         if (cancelled) return;
         const prev = prevRef.current;
         if (!prev) {
-          append({ kind: "initial", players: ps, snapshot: next });
+          append({ kind: "snapshot", at: next.at, players: ps, unique: next.unique, changes: [] });
         } else {
           const changes: Change[] = [];
           for (const p of ps) {
             const d = diffIds(prev.completed[p] ?? [], next.completed[p] ?? []);
             if (d.added.length || d.removed.length) changes.push({ player: p, ...d });
           }
-          if (changes.length > 0) append({ kind: "change", at: next.at, changes });
+          if (changes.length > 0) {
+            append({ kind: "snapshot", at: next.at, players: ps, unique: next.unique, changes });
+          }
         }
         prevRef.current = next;
         setSnapshot(next);
