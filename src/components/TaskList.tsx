@@ -30,10 +30,12 @@ export function TaskList({
   label,
   tasks,
   showCount = true,
+  compact = false,
 }: {
   label: string;
   tasks: Task[];
   showCount?: boolean;
+  compact?: boolean;
 }) {
   if (tasks.length === 0) {
     return <Text color="gray">{label}: none</Text>;
@@ -53,6 +55,16 @@ export function TaskList({
       {TIERS.map((tier) => {
         const group = grouped.get(tier);
         if (!group?.length) return null;
+        if (compact) {
+          return (
+            <Box key={tier} flexDirection="column" marginTop={1}>
+              <Text color={tierColor(tier)} bold>
+                {tier}:
+              </Text>
+              <Text>{group.map((t) => t.name).join(", ")}</Text>
+            </Box>
+          );
+        }
         return (
           <Box key={tier} flexDirection="column" marginTop={1}>
             <Text color={tierColor(tier)} bold>

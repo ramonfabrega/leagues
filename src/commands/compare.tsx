@@ -28,6 +28,10 @@ export const options = z.object({
     .number()
     .default(10)
     .describe(option({ description: "Watch poll interval in seconds" })),
+  compact: z
+    .boolean()
+    .default(false)
+    .describe(option({ description: "Compact output: task names only, grouped by tier", alias: "c" })),
   json: jsonOption,
 });
 
@@ -46,8 +50,8 @@ function enterAltScreen() {
 export default function Compare({ args, options }: Props) {
   if (options.watch) enterAltScreen();
   return options.watch ? (
-    <CompareWatch args={args} intervalMs={options.interval * 1000} />
+    <CompareWatch args={args} intervalMs={options.interval * 1000} compact={options.compact} />
   ) : (
-    <CompareOnce args={args} json={options.json} />
+    <CompareOnce args={args} json={options.json} compact={options.compact} />
   );
 }

@@ -50,14 +50,27 @@ function diffIds(prev: Task[], next: Task[]): { added: Task[]; removed: Task[] }
   };
 }
 
-function CompareOnceResult({ players, snapshot }: { players: string[]; snapshot: Snapshot }) {
+function CompareOnceResult({
+  players,
+  snapshot,
+  compact,
+}: {
+  players: string[];
+  snapshot: Snapshot;
+  compact: boolean;
+}) {
   return (
-    <Static items={[{ players, snapshot }]}>
+    <Static items={[{ players, snapshot, compact }]}>
       {(item) => (
         <Box key="once" flexDirection="column">
           {item.players.map((p) => (
             <Box key={p} marginTop={1}>
-              <TaskList label={p} tasks={item.snapshot.unique[p] ?? []} showCount={false} />
+              <TaskList
+                label={p}
+                tasks={item.snapshot.unique[p] ?? []}
+                showCount={false}
+                compact={item.compact}
+              />
             </Box>
           ))}
         </Box>
@@ -66,13 +79,21 @@ function CompareOnceResult({ players, snapshot }: { players: string[]; snapshot:
   );
 }
 
-export function CompareOnce({ args, json }: { args: string[]; json?: boolean }) {
+export function CompareOnce({
+  args,
+  json,
+  compact = false,
+}: {
+  args: string[];
+  json?: boolean;
+  compact?: boolean;
+}) {
   return (
     <Async
       loader={async () => {
         const players = resolvePlayers(args);
         const snapshot = await buildSnapshot(players);
-        return { players, snapshot };
+        return { players, snapshot, compact };
       }}
       render={CompareOnceResult}
       json={json}
@@ -142,7 +163,15 @@ function LiveBlock({ pct, tick, stats }: { pct: number; tick: number; stats: Pla
   );
 }
 
-function LogEntryView({ entry, nameW }: { entry: LogEntry; nameW: number }) {
+function LogEntryView({
+  entry,
+  nameW,
+  compact,
+}: {
+  entry: LogEntry;
+  nameW: number;
+  compact: boolean;
+}) {
   if (entry.kind === "snapshot") {
     const isInitial = entry.changes.length === 0;
     const rows: { sign: "+" | "-"; player: string; points: number; task: string; key: string }[] =
@@ -160,7 +189,7 @@ function LogEntryView({ entry, nameW }: { entry: LogEntry; nameW: number }) {
         </Text>
         {entry.players.map((p) => (
           <Box key={p} marginTop={1}>
-            <TaskList label={p} tasks={entry.unique[p] ?? []} showCount={false} />
+            <TaskList label={p} tasks={entry.unique[p] ?? []} showCount={false} compact={compact} />
           </Box>
         ))}
         {rows.length > 0 ? (
@@ -191,7 +220,15 @@ function LogEntryView({ entry, nameW }: { entry: LogEntry; nameW: number }) {
   );
 }
 
-export function CompareWatch({ args, intervalMs }: { args: string[]; intervalMs: number }) {
+export function CompareWatch({
+  args,
+  intervalMs,
+  compact = false,
+}: {
+  args: string[];
+  intervalMs: number;
+  compact?: boolean;
+}) {
   const [players, setPlayers] = useState<string[] | null>(null);
   const [log, setLog] = useState<LogEntry[]>([]);
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
@@ -268,7 +305,9 @@ export function CompareWatch({ args, intervalMs }: { args: string[]; intervalMs:
   return (
     <>
       <Static items={log}>
-        {(entry) => <LogEntryView key={entry.id} entry={entry} nameW={nameW} />}
+        {(entry) => (
+          <LogEntryView key={entry.id} entry={entry} nameW={nameW} compact={compact} />
+        )}
       </Static>
       <Box marginTop={1}>
         <LiveBlock pct={pct} tick={tick} stats={statsFrom(players, snapshot)} />
