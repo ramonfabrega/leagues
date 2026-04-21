@@ -1,3 +1,4 @@
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { z } from "zod";
 
@@ -48,18 +49,22 @@ const CATALOG_PATH = path.join(import.meta.dir, "../../data/tasks.json");
 let cached: Catalog | null = null;
 let cachedById: Map<number, Task> | null = null;
 
-export async function loadCatalog(): Promise<Catalog> {
+export function loadCatalog(): Catalog {
   if (cached) return cached;
-  const file = Bun.file(CATALOG_PATH);
-  if (!(await file.exists())) {
+
+  if (!existsSync(CATALOG_PATH)) {
     throw new Error(`data/tasks.json not found. Run "leagues scrape" to generate it.`);
   }
-  const parsed = CatalogSchema.safeParse(await file.json());
+
+  const raw = JSON.parse(readFileSync(CATALOG_PATH, "utf8"));
+  const parsed = CatalogSchema.safeParse(raw);
+
   if (!parsed.success) {
     throw new Error(
       `data/tasks.json is malformed — re-run "leagues scrape":\n${z.prettifyError(parsed.error)}`
     );
   }
+
   cached = parsed.data;
   return cached;
 }
@@ -70,14 +75,14 @@ export async function writeCatalog(catalog: Catalog): Promise<void> {
   cachedById = null;
 }
 
-export async function taskById(id: number | string): Promise<Task | undefined> {
-  const { tasks } = await loadCatalog();
+export function taskById(id: number | string): Task | undefined {
+  const { tasks } = loadCatalog();
   if (!cachedById) cachedById = new Map(tasks.map((t) => [t.id, t]));
   return cachedById.get(Number(id));
 }
 
-export async function findTasks(query: string): Promise<Task[]> {
-  const { tasks } = await loadCatalog();
+export function findTasks(query: string): Task[] {
+  const { tasks } = loadCatalog();
   const q = query.toLowerCase();
   return tasks.filter(
     (t) => t.name.toLowerCase().includes(q) || t.description.toLowerCase().includes(q)

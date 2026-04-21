@@ -26,7 +26,7 @@ function resolvePlayers(args: string[]): string[] {
 }
 
 async function buildSnapshot(players: string[]): Promise<Snapshot> {
-  const progresses = await Promise.all(players.map((r) => getPlayerProgress(r)));
+  const progresses = await Promise.all(players.map(getPlayerProgress));
   const completed: Record<string, Task[]> = {};
   const unique: Record<string, Task[]> = {};
   const totalPoints: Record<string, number> = {};
@@ -305,9 +305,7 @@ export function CompareWatch({
   return (
     <>
       <Static items={log}>
-        {(entry) => (
-          <LogEntryView key={entry.id} entry={entry} nameW={nameW} compact={compact} />
-        )}
+        {(entry) => <LogEntryView key={entry.id} entry={entry} nameW={nameW} compact={compact} />}
       </Static>
       <Box marginTop={1}>
         <LiveBlock pct={pct} tick={tick} stats={statsFrom(players, snapshot)} />

@@ -26,17 +26,17 @@ export type TaskFilter = {
 // ─── I/O wrappers ──────────────────────────────────────────────────
 
 export async function getPlayerProgress(rsn: string): Promise<PlayerProgress> {
-  return await buildProgress(await fetchPlayer(rsn));
+  return buildProgress(await fetchPlayer(rsn));
 }
 
-async function buildProgress(raw: PlayerData): Promise<PlayerProgress> {
+function buildProgress(raw: PlayerData): PlayerProgress {
   const completedTaskIds = new Set<number>();
   const completed: Task[] = [];
   const unknownTaskIds: string[] = [];
   let totalPoints = 0;
 
   for (const idStr of raw.league_tasks) {
-    const task = await taskById(idStr);
+    const task = taskById(idStr);
     if (!task) {
       unknownTaskIds.push(idStr);
       continue;
@@ -56,28 +56,25 @@ async function buildProgress(raw: PlayerData): Promise<PlayerProgress> {
   };
 }
 
-export async function missingTasks(
-  player: PlayerProgress,
-  filter: TaskFilter = {}
-): Promise<Task[]> {
-  const { tasks } = await loadCatalog();
+export function missingTasks(player: PlayerProgress, filter: TaskFilter = {}): Task[] {
+  const { tasks } = loadCatalog();
   return filterMissing(tasks, player, filter);
 }
 
-export async function easiestMissing(
+export function easiestMissing(
   player: PlayerProgress,
   filter: TaskFilter = {},
   limit = 20
-): Promise<Task[]> {
-  const { tasks } = await loadCatalog();
+): Task[] {
+  const { tasks } = loadCatalog();
   return pickEasiest(tasks, player, filter, limit);
 }
 
-export async function searchCatalog(
+export function searchCatalog(
   query: string,
   opts: { player?: PlayerProgress; filter?: TaskFilter } = {}
-): Promise<Task[]> {
-  const matches = await findTasks(query);
+): Task[] {
+  const matches = findTasks(query);
   return matches.filter((t) => {
     if (opts.player?.completedTaskIds.has(t.id)) return false;
     return matchesFilter(t, opts.filter ?? {});

@@ -26,11 +26,7 @@ export default function Easiest({ options }: Props) {
     <Async
       loader={async () => {
         const player = await getPlayerProgress(resolvePlayer(options.player));
-        const tasks = await easiestMissing(
-          player,
-          buildFilter(options, player.levels),
-          options.limit
-        );
+        const tasks = easiestMissing(player, buildFilter(options, player.levels), options.limit);
         const label = `Easiest missing for ${player.username}`;
         return { label, tasks };
       }}

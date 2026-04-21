@@ -53,7 +53,7 @@ export default function Search({ args, options }: Props) {
           { allRegions: options.allRegions, withinLevels: options.withinLevels },
           player?.levels
         );
-        const matches = await searchCatalog(query, {
+        const matches = searchCatalog(query, {
           player: options.completed ? undefined : (player ?? undefined),
           filter,
         });

@@ -20,8 +20,9 @@ export default function Summary({ options }: Props) {
   return (
     <Async
       loader={async () => {
-        const rsn = resolvePlayer(options.player);
-        const [player, catalog] = await Promise.all([getPlayerProgress(rsn), loadCatalog()]);
+        const player = await getPlayerProgress(resolvePlayer(options.player));
+        const catalog = loadCatalog();
+
         return {
           username: player.username,
           totalPoints: player.totalPoints,

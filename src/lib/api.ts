@@ -40,7 +40,25 @@ async function fetchPlayerRaw(rsn: string, league: string): Promise<unknown> {
     return await Bun.file(path.join(fixtureDir, `${rsn}.json`)).json();
   }
   const url = `https://sync.runescape.wiki/runelite/player/${encodeURIComponent(rsn)}/${league}`;
-  const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
+  const res = await fetch(url, {
+    credentials: "include",
+    headers: {
+      "User-Agent":
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:149.0) Gecko/20100101 Firefox/149.0",
+      Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      "Accept-Language": "en-US,en;q=0.9",
+      "Alt-Used": "sync.runescape.wiki",
+      "Upgrade-Insecure-Requests": "1",
+      "Sec-Fetch-Dest": "document",
+      "Sec-Fetch-Mode": "navigate",
+      "Sec-Fetch-Site": "none",
+      "If-None-Match": 'W/"74dd-Oy+Dwbed+aAIJUQOTKf3+YOpZkE"',
+      Priority: "u=0, i",
+    },
+    method: "GET",
+    mode: "cors",
+  });
+
   if (!res.ok) throw new Error(`fetchPlayer(${rsn}) → ${res.status} ${res.statusText}`);
   return await res.json();
 }
